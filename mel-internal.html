@@ -90,7 +90,7 @@ canvas{display:block}
       <div class="logodot">GL</div>
       <div>
         <div class="logotxt">MEL Framework - Internal</div>
-        <div class="logosub">GIZ - Investment Readiness Programme - Good Life X</div>
+        <div class="logosub">GIZ SME Programme - Good Life X</div>
       </div>
     </div>
     <div class="conn"><div id="cd"></div><span id="ct">Connecting...</span></div>
@@ -1135,19 +1135,14 @@ async function genReport(){
       }
     }
     btn.innerHTML="<span class='spn'></span>Writing report with AI...";
-    var prompt="Write a professional diagnostic report for the GoodLifeX / GIZ Investment Readiness Programme.\n\nCompany: "+coName+"\nRound: "+round+"\n\nStructure:\nA. Program Context\nB. Company Snapshot\nC. Initial Observations and Assessment\nD. Circular Opportunity Area Identified\nE. Recommendations for THRIVE Design Lab\nF. Potential Impact of Circular Strategy\nG. Other Possible Areas for Incorporating Circularity\nH. Conclusion\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL SCORES ("+round+"):\n"+scoreText+"\n\nCIRCULAR OPPORTUNITY:\n"+(circ||"To be determined")+"\n\nNARRATIVE:\n"+(narr||"To be added")+"\n\nStyle: Match the CET Diagnostics Report by Arj Wignaraja and GoodLifeX. Warm, specific, professional. Frame low scores as growth opportunities. Include impact table in section F.";
-    // Call Anthropic via corsproxy.io which adds CORS headers
-    var resp=await fetch("https://corsproxy.io/?https://api.anthropic.com/v1/messages",{
+    var prompt="Write a professional diagnostic report for the GoodLifeX / GIZ SME Programme.\n\nCompany: "+coName+"\nRound: "+round+"\n\nStructure:\nA. Program Context\nB. Company Snapshot\nC. Initial Observations and Assessment\nD. Circular Opportunity Area Identified\nE. Recommendations for THRIVE Design Lab\nF. Potential Impact of Circular Strategy\nG. Other Possible Areas for Incorporating Circularity\nH. Conclusion\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL SCORES ("+round+"):\n"+scoreText+"\n\nCIRCULAR OPPORTUNITY:\n"+(circ||"To be determined")+"\n\nNARRATIVE:\n"+(narr||"To be added")+"\n\nStyle: Match the CET Diagnostics Report by Arj Wignaraja and GoodLifeX. Warm, specific, professional. Frame low scores as growth opportunities. Include impact table in section F.";
+    var resp=await fetch("https://melreportgen.thushan-6bf.workers.dev/",{
       method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-api-key":"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",
-        "anthropic-version":"2023-06-01"
-      },
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:prompt}]})
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({prompt:prompt})
     });
     var data=await resp.json();
-    var text=(data.content||[]).map(function(c){return c.text||"";}).join("")||"Error generating. Please try again.";
+    var text=data.text||"Error generating. Please try again.";
     var c=mkEl("div","card"); c.style.marginTop="14px";
     var hd=mkEl("div",""); hd.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px";
     var ht=mkEl("div","ctitle"); ht.textContent=coName+" - "+round+" report";
