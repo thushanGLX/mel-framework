@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>THRIVE Self-Assessment — GIZ Programme</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh}
+.app{max-width:700px;margin:0 auto;padding:24px 20px 80px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e0dfd8}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-dot{width:34px;height:34px;border-radius:9px;background:#0F6E56;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.logo-text{font-size:15px;font-weight:700}.logo-sub{font-size:11px;color:#999}
+.conn{display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:#ccc}
+.card{background:#fff;border:1px solid #e0dfd8;border-radius:14px;padding:20px}
+.card+.card,.card+div>.card{margin-top:14px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.card-sub{font-size:12px;color:#999;margin-bottom:16px;line-height:1.5}
+.field-group{margin-bottom:14px}
+.field-label{font-size:12px;color:#555;margin-bottom:5px;display:block;font-weight:500}
+select,input[type=text],textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;color:#1a1a18;font-family:inherit;outline:none;transition:border 0.15s}
+select:focus,input:focus,textarea:focus{border-color:#0F6E56}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+.submit-btn{width:100%;padding:13px;border-radius:10px;background:#0F6E56;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-top:18px;font-family:inherit;transition:all 0.15s}
+.submit-btn:hover{background:#085041}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed}
+.back-btn{background:transparent;border:none;color:#888;font-size:13px;cursor:pointer;padding:0;margin-bottom:20px;display:flex;align-items:center;gap:5px;font-family:inherit}
+.back-btn:hover{color:#1a1a18}
+.pillar-row{border-bottom:1px solid #f0efe8;padding:14px 0}
+.pillar-row:last-child{border-bottom:none;padding-bottom:0}
+.pillar-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.pillar-sub{font-size:11px;color:#aaa;margin-bottom:10px}
+.score-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.score-lbl{font-size:11px;color:#888;min-width:90px}
+.score-val{font-size:13px;font-weight:700;min-width:36px;text-align:right}
+input[type=range]{flex:1;accent-color:#0F6E56;cursor:pointer}
+.conf-row{display:flex;gap:6px;margin-top:6px}
+.conf-btn{padding:4px 12px;border-radius:6px;border:1px solid #ddd;font-size:11px;cursor:pointer;background:#fff;color:#888;font-family:inherit;transition:all 0.15s}
+.conf-btn.h{background:#e0f5ec;border-color:#1D9E75;color:#085041;font-weight:600}
+.conf-btn.m{background:#fef3e2;border-color:#BA7517;color:#633806;font-weight:600}
+.conf-btn.l{background:#fde8e8;border-color:#E24B4A;color:#791F1F;font-weight:600}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.metric-card{background:#f5f4f0;border-radius:10px;padding:13px;text-align:center}
+.metric-label{font-size:10px;color:#aaa;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.metric-val{font-size:24px;font-weight:700}
+.bar-row{margin-bottom:12px}
+.bar-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.bar-track{height:6px;background:#f0efe8;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.5s}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0F6E56;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:1000;box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+.toast.show{opacity:1}
+.sp{width:16px;height:16px;border:2px solid #e0dfd8;border-top-color:#0F6E56;border-radius:50%;animation:spin 0.7s linear infinite}
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:48px;color:#aaa;font-size:13px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.legend{display:flex;gap:16px;margin-top:10px;justify-content:center;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#666}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.thrive-id-badge{background:#e0f5ec;color:#085041;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:0.04em}
+.tag{display:inline-block;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:500}
+.tg{background:#e0f5ec;color:#085041}
+.ta{background:#fef3e2;color:#633806}
+canvas{display:block}
+
+.hero{background:#0F6E56;border-radius:16px;padding:26px 22px;margin-bottom:22px;color:#fff}
+.hero-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.hero-sub{font-size:13px;opacity:0.8;line-height:1.7}
+.step-dots{display:flex;gap:6px;margin-bottom:20px}
+.step-dot{width:8px;height:8px;border-radius:50%;background:#ddd;transition:background 0.2s}
+.step-dot.done{background:#0F6E56}
+.step-dot.active{background:#0F6E56;box-shadow:0 0 0 3px #e0f5ec}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-dot">GL</div>
+      <div><div class="logo-text">THRIVE self-assessment</div><div class="logo-sub">GIZ · Investment Readiness Programme</div></div>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-title">How regenerative is your business?</div>
+    <div class="hero-sub">Complete this self-assessment after the THRIVE masterclass. It takes about 10 minutes. Be honest — your answers help the programme team support you better. Your scores will be compared against the expert assessment to identify gaps and opportunities.</div>
+  </div>
+  <div id="main-content"></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+
+const AT_KEY="pat1Oa1Z0A4zWYneN.1f721a20a51c8f40fca4dd8622a43689002615d2b051d50ffbd09dfdc8348b2d";
+const BASE="appPFQWqbIP5Twi4r";
+const THRIVE=[
+  {id:"P2",name:"Purpose & Principles"},
+  {id:"E2",name:"Enabling Ecosystem"},
+  {id:"T2",name:"Transformative Tasks"},
+  {id:"R2",name:"Resilient Relationships"},
+  {id:"C2",name:"Conscious Customers"},
+  {id:"A2",name:"Abundant Assets"},
+  {id:"M2",name:"Methods to Market"},
+  {id:"I2",name:"Impactful Investments"},
+  {id:"V2",name:"Verifiable Value"}
+];
+const PILLARS=["Leadership Capacity","Management Capacity","Ops Team / Staff","Supply Chain","Demand","Systems & Processes","Data & Information","Financial Firepower","Product / Brand Equity","Governance & Culture"];
+
+function toast(msg,dur=3000){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),dur);}
+async function atGet(path){const r=await fetch(`https://api.airtable.com/v0/${BASE}/${path}`,{headers:{"Authorization":`Bearer ${AT_KEY}`}});return r.json();}
+async function atPost(path,body){const r=await fetch(`https://api.airtable.com/v0/${BASE}/${path}`,{method:"POST",headers:{"Authorization":`Bearer ${AT_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}
+function avg(arr){return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):0;}
+
+function drawThreeWaySpider(canvasId, labels, expertVals, companyVals, assessorVals){
+  const cv=document.getElementById(canvasId);if(!cv)return;
+  const ctx=cv.getContext("2d"),n=labels.length,cx=cv.width/2,cy=cv.height/2,r=Math.min(cx,cy)-38;
+  const ang=i=>(Math.PI*2*i)/n-Math.PI/2;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  [0.25,0.5,0.75,1].forEach(f=>{
+    ctx.beginPath();
+    labels.forEach((_,i)=>{const a=ang(i),x=cx+r*f*Math.cos(a),y=cy+r*f*Math.sin(a);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.closePath();ctx.strokeStyle="rgba(0,0,0,0.07)";ctx.lineWidth=0.8;ctx.stroke();
+  });
+  labels.forEach((_,i)=>{const a=ang(i);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.strokeStyle="rgba(0,0,0,0.08)";ctx.lineWidth=0.6;ctx.stroke();});
+  function drawSeries(vals,color,fill,lw){
+    if(!vals||!vals.length)return;
+    ctx.beginPath();
+    vals.forEach((v,i)=>{const a=ang(i),f=v/100,x=cx+r*f*Math.cos(a),y=cy+r*f*Math.sin(a);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.stroke();
+  }
+  if(assessorVals&&assessorVals.length)drawSeries(assessorVals,"#B4B2A9","rgba(180,178,169,0.08)",1.2);
+  if(expertVals&&expertVals.length)drawSeries(expertVals,"#0F6E56","rgba(15,110,86,0.12)",2);
+  if(companyVals&&companyVals.length)drawSeries(companyVals,"#D85A30","rgba(216,90,48,0.10)",2);
+  labels.forEach((lbl,i)=>{
+    const a=ang(i),lx=cx+(r+24)*Math.cos(a),ly=cy+(r+24)*Math.sin(a);
+    ctx.font="9px -apple-system,sans-serif";ctx.fillStyle="#666";
+    ctx.textAlign=Math.cos(a)>0.15?"left":Math.cos(a)<-0.15?"right":"center";
+    ctx.textBaseline=Math.sin(a)>0.15?"top":Math.sin(a)<-0.15?"bottom":"middle";
+    ctx.fillText(lbl.length>12?lbl.slice(0,11)+"…":lbl,lx,ly);
+  });
+}
+
+
+let S={company:"",round:"Baseline",scores:{},notes:{}};
+THRIVE.forEach(t=>{S.scores[t.id]=3;S.notes[t.id]="";});
+
+function init(){renderStep0();}
+
+function renderStep0(){
+  document.getElementById("main-content").innerHTML=`
+    <div class="card">
+      <div class="card-title">Before you start</div>
+      <div class="card-sub">Select your company and the assessment round. Make sure you have attended the THRIVE masterclass before filling this in.</div>
+      <div class="field-group"><label class="field-label">Your company</label>
+        <select id="inp-co" onchange="S.company=this.value">
+          <option value="">— Select your company —</option>
+          <option value="rec2oXy9hZCyyS3qu">Test</option>
+<option value="recKl0Qp40ZoViPpJ">Jaffna Horticulture</option>
+<option value="recV0Oak0Ru40FCtF">AiGrow</option>
+<option value="recaNl4i18QR4iboK">Saara Labs</option>
+<option value="recfDu1dqz6X51OJK">A R Natural Export</option>
+<option value="recgh9N7BJU5LO737">Navigata Foods</option>
+<option value="recmkMq6L0CQ8prZb">Seashore Gardens</option>
+<option value="recockH7360fqeHSH">CleanTech</option>
+<option value="recyaHP0oaJAU9tkh">E-Silk Route Ventures</option>
+        </select></div>
+      <div class="field-group"><label class="field-label">Assessment round</label>
+        <select onchange="S.round=this.value"><option>Baseline</option><option>Midpoint</option><option>Endpoint</option></select></div>
+      <div style="margin-top:6px;padding:12px 14px;background:#f0faf7;border-radius:8px;border:1px solid #c0e8d8">
+        <div style="font-size:12px;font-weight:600;color:#085041;margin-bottom:4px">Important note</div>
+        <div style="font-size:12px;color:#444;line-height:1.6">Score each pillar honestly based on where your business is <strong>today</strong> — not where you want to be. A low score is not a failure; it shows where we can support you.</div>
+      </div>
+      <button class="submit-btn" onclick="startAssessment()">Start self-assessment →</button>
+    </div>
+  `;
+}
+
+function startAssessment(){
+  if(!S.company){toast("Please select your company first");return;}
+  renderPillars();
+}
+
+function renderPillars(){
+  document.getElementById("main-content").innerHTML=`
+    <div class="step-dots">${THRIVE.map((_,i)=>`<div class="step-dot" id="sd${i}"></div>`).join("")}</div>
+    <div class="card">
+      <div class="card-title">Rate each THRIVE pillar</div>
+      <div class="card-sub">Use the slider to score from 1 (not yet started) to 5 (fully embedded). Add notes if you have specific evidence or context.</div>
+      ${THRIVE.map((t,i)=>`
+        <div class="pillar-row" id="pr${i}">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="thrive-id-badge">${t.id}</span>
+            <span class="pillar-name" style="margin-bottom:0">${t.name}</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-bottom:10px;line-height:1.5">${thriveDesc(t.id)}</div>
+          <div class="score-row">
+            <span class="score-lbl">Your score</span>
+            <input type="range" min="1" max="5" step="1" value="${S.scores[t.id]}" oninput="S.scores['${t.id}']=+this.value;document.getElementById('sv${t.id}').textContent=this.value+' / 5';updateDots()">
+            <span class="score-val" id="sv${t.id}" style="color:#0F6E56">${S.scores[t.id]} / 5</span>
+          </div>
+          <div style="margin-top:8px"><input type="text" placeholder="What evidence supports this score? (optional)" oninput="S.notes['${t.id}']=this.value" style="font-size:12px"></div>
+        </div>`).join("")}
+    </div>
+    <button class="submit-btn" id="sub-btn" onclick="submitSelf()">Submit my self-assessment →</button>
+    <div style="font-size:11px;color:#aaa;text-align:center;margin-top:8px">Your scores are saved privately and shown to the programme team alongside expert scores.</div>
+  `;
+  updateDots();
+}
+
+function thriveDesc(id){
+  const d={
+    P2:"How clearly defined is your company purpose? Do all team members understand and live by it?",
+    E2:"How broad and deep are your external networks? How well do you engage with your ecosystem?",
+    T2:"How well is circularity embedded in your operations? Zero-waste, 3Rs, regenerative activities?",
+    R2:"How aware and supportive are your customers of your purpose? How long do relationships last?",
+    C2:"How well have you identified customer segments that resonate with your purpose?",
+    A2:"How well are you leveraging under-used assets — internal and external?",
+    M2:"What percentage of revenue comes from non-traditional markets? How robust is your digital presence?",
+    I2:"How effective are your investments in storytelling, R&D and training?",
+    V2:"How resilient are your margins? How diverse and repeatable is your revenue?",
+  };
+  return d[id]||"";
+}
+
+function updateDots(){
+  THRIVE.forEach((_,i)=>{
+    const dot=document.getElementById("sd"+i);if(!dot)return;
+    dot.className="step-dot done";
+  });
+}
+
+async function submitSelf(){
+  const btn=document.getElementById("sub-btn");
+  btn.disabled=true;btn.innerHTML='<span class="ls"></span>Saving your assessment...';
+  try{
+    const coName=document.querySelector("#inp-co")?.selectedOptions[0]?.text||"Company";
+    const ar=await atPost("Assessment%20Records",{fields:{"Record Name":`${coName} — ${S.round} (Company Self-Assessment)`,"Company":[S.company],"Assessment Type":S.round,"Date":new Date().toISOString().split("T")[0],"Status":"Draft","Notes":"Company self-assessment via portal"}});
+    const aId=ar.id;
+    const recs=THRIVE.map(t=>{return{fields:{"Assessment Record":[aId],"Assessor Name":coName,"Assessor Role":"Company","Pillar Code":t.id,"Pillar Name":t.name,"Score (1-5)":S.scores[t.id],"Findings / Notes":S.notes[t.id]||""}}});
+    await atPost("THRIVE%20Scores",{records:recs});
+    document.getElementById("main-content").innerHTML=`
+      <div class="card" style="text-align:center;padding:40px 24px">
+        <div style="font-size:36px;margin-bottom:16px">✓</div>
+        <div style="font-size:18px;font-weight:700;color:#0F6E56;margin-bottom:8px">Thank you!</div>
+        <div style="font-size:14px;color:#666;line-height:1.7">Your self-assessment has been saved. The programme team will compare your scores against the expert assessment and share the results with you in your company dashboard.</div>
+      </div>
+    `;
+  }catch(e){
+    toast("Error saving. Please try again.");
+    btn.disabled=false;btn.textContent="Submit my self-assessment →";
+  }
+}
+
+init();
+</script>
+</body>
+</html>

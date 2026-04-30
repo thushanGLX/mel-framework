@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MEL Framework - Internal Tool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh}
+.wrap{max-width:700px;margin:0 auto;padding:24px 20px 80px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #e0dfd8}
+.logo{display:flex;align-items:center;gap:10px}
+.logodot{width:34px;height:34px;border-radius:9px;background:#0F6E56;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.logotxt{font-size:15px;font-weight:700}
+.logosub{font-size:11px;color:#999}
+.conn{display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa}
+#cd{width:6px;height:6px;border-radius:50%;background:#ccc;display:inline-block}
+.sec-lbl{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;font-weight:500;margin-top:4px}
+.card{background:#fff;border:1px solid #e0dfd8;border-radius:14px;padding:20px;margin-top:14px}
+.card:first-child{margin-top:0}
+.ctitle{font-size:15px;font-weight:700;margin-bottom:4px}
+.csub{font-size:12px;color:#999;margin-bottom:16px;line-height:1.5}
+.fg{margin-bottom:14px}
+.fl{font-size:12px;color:#555;margin-bottom:5px;display:block;font-weight:500}
+select,input[type=text],textarea{width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;color:#1a1a18;font-family:inherit;outline:none}
+select:focus,input:focus,textarea:focus{border-color:#0F6E56}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+.btnp{width:100%;padding:13px;border-radius:10px;background:#0F6E56;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-top:18px;font-family:inherit}
+.btnp:hover{background:#085041}
+.btnp:disabled{opacity:0.5;cursor:not-allowed}
+.btnb{background:transparent;border:none;color:#888;font-size:13px;cursor:pointer;padding:0;margin-bottom:20px;font-family:inherit}
+.btnb:hover{color:#1a1a18}
+.rgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px}
+.rcard{background:#fff;border:1.5px solid #e0dfd8;border-radius:12px;padding:16px;cursor:pointer}
+.rcard:hover{border-color:#0F6E56}
+.rcard.on{border:2px solid #0F6E56;background:#f0faf7}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.abtn{background:#fff;border:1px solid #e0dfd8;border-radius:10px;padding:14px;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:10px;width:100%;font-family:inherit}
+.abtn:hover{border-color:#0F6E56;background:#f9fffe}
+.abtn.pri{background:#0F6E56;border-color:#0F6E56}
+.abtitle{font-size:13px;font-weight:600;margin-bottom:2px;color:#1a1a18}
+.abdesc{font-size:11px;color:#888;line-height:1.4}
+.abtn.pri .abtitle{color:#fff}
+.abtn.pri .abdesc{color:#9FE1CB}
+.abico{width:32px;height:32px;border-radius:7px;background:#f0efe8;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.abtn.pri .abico{background:rgba(255,255,255,0.18)}
+.prow{border-bottom:1px solid #f0efe8;padding:14px 0}
+.prow:last-child{border-bottom:none;padding-bottom:0}
+.pname{font-size:13px;font-weight:600;margin-bottom:8px}
+.srow{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.slbl2{font-size:11px;color:#888;min-width:100px}
+.sval{font-size:13px;font-weight:700;min-width:36px;text-align:right}
+input[type=range]{flex:1;accent-color:#0F6E56;cursor:pointer}
+.crow{display:flex;gap:6px;margin-top:6px}
+.cbtn{padding:4px 12px;border-radius:6px;border:1px solid #ddd;font-size:11px;cursor:pointer;background:#fff;color:#888;font-family:inherit}
+.ch{background:#e0f5ec;border-color:#1D9E75;color:#085041;font-weight:600}
+.cm{background:#fef3e2;border-color:#BA7517;color:#633806;font-weight:600}
+.cl{background:#fde8e8;border-color:#E24B4A;color:#791F1F;font-weight:600}
+.ntabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid #e0dfd8;padding-bottom:10px}
+.ntab{padding:7px 14px;border-radius:7px;border:none;background:transparent;font-size:12px;cursor:pointer;color:#888;font-family:inherit;font-weight:500}
+.ntab.on{background:#0F6E56;color:#fff}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.mc{background:#f5f4f0;border-radius:10px;padding:13px;text-align:center}
+.mlbl{font-size:10px;color:#aaa;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.mval{font-size:24px;font-weight:700}
+.brow{margin-bottom:12px}
+.btop{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.btrk{height:6px;background:#f0efe8;border-radius:4px;overflow:hidden}
+.bfil{height:100%;border-radius:4px;transition:width 0.5s}
+.rbox{background:#fafaf8;border-radius:10px;padding:16px;font-size:13px;line-height:1.9;white-space:pre-wrap;max-height:500px;overflow-y:auto;margin-top:12px;border:1px solid #e8e7e0}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0F6E56;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:1000;box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+.toast.show{opacity:1}
+.spn{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;margin-right:7px;vertical-align:middle}
+.sp2{width:16px;height:16px;border:2px solid #e0dfd8;border-top-color:#0F6E56;border-radius:50%;animation:sp 0.7s linear infinite}
+.ld{display:flex;align-items:center;justify-content:center;gap:10px;padding:48px;color:#aaa;font-size:13px}
+.leg{display:flex;gap:16px;margin-top:10px;justify-content:center;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:#666}
+.ldot{width:10px;height:10px;border-radius:50%}
+.bdg{background:#e0f5ec;color:#085041;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.pill{padding:6px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.pill:hover{border-color:#0F6E56;color:#0F6E56}
+canvas{display:block}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logodot">GL</div>
+      <div>
+        <div class="logotxt">MEL Framework - Internal</div>
+        <div class="logosub">GIZ - Investment Readiness Programme - Good Life X</div>
+      </div>
+    </div>
+    <div class="conn"><div id="cd"></div><span id="ct">Connecting...</span></div>
+  </div>
+  <div id="vh"></div>
+  <div id="vs" style="display:none"></div>
+  <div id="vd" style="display:none"></div>
+  <div id="vr" style="display:none"></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+var KEY = "pat1Oa1Z0A4zWYneN.1f721a20a51c8f40fca4dd8622a43689002615d2b051d50ffbd09dfdc8348b2d";
+var BASE = "appPFQWqbIP5Twi4r";
+
+// Exact table names from Airtable (note: "Assesment" is the typo in Airtable)
+var T_ASSESSMENTS   = "Assesment%20Records";
+var T_FUNDAMENTALS  = "Fundamental%20Scores";
+var T_THRIVE        = "THRIVE%20Scores";
+var T_IRC           = "IRC%20%2F%20GIZ%20Scores";
+var T_CAPACITY      = "Capacity%20Building";
+var T_SCP           = "SCP%20Indicators";
+var T_CONSENSUS     = "Consensus%20Scores";
+
+// Exact field names from Airtable schema
+var F = {
+  // Assessment Records
+  rec_name:    "Record Name",
+  rec_company: "Company",
+  rec_type:    "Assessment Type",
+  rec_date:    "Date",
+  rec_status:  "Status",
+  rec_notes:   "Notes",
+
+  // Fundamental Scores
+  fund_record:     "Assessment Record",
+  fund_assessor:   "Assessor Name",
+  fund_pillar:     "Pillar Name",
+  fund_score:      "Score (0–100)",        // en-dash from Airtable
+  fund_potential:  "Scale-up Potential (0–100)",  // en-dash
+  fund_commentary: "Commentary",
+  fund_confidence: "Confidence Level",
+
+  // THRIVE Scores
+  thrive_record:   "Assessment Record",
+  thrive_assessor: "Assessor Name",
+  thrive_pillar:   "Pillar Name",
+  thrive_score:    "Score (1\u20135)",         // en-dash
+  thrive_findings: "Findings",
+
+  // IRC Scores
+  irc_record:    "Assessment Record",
+  irc_assessor:  "Assessor Name",
+  irc_section:   "Section",
+  irc_raw:       "Raw Score (0\u201340)",      // en-dash
+  irc_feedback:  "Assessor Feedback",
+
+  // Consensus Scores
+  con_record:    "Assessment Record",
+  con_pillar:    "Pillar Name",
+  con_score:     "Final Score (0\u2013100)",
+  con_comment:   "Final Commentary",
+  con_variance:  "Variance Notes",
+  con_agreed:    "Agreed by",
+  con_date:      "Date",
+
+  // SCP Indicators
+  scp_record:    "Assessment Record",
+  scp_theme:     "Theme Name",
+  scp_score:     "Score (1\u20135)",
+  scp_notes:     "Evidence / Notes",
+  scp_link:      "Evidence Link",
+
+  // Capacity Building
+  cap_record:    "Assessment Record",
+  cap_category:  "Need Category",
+  cap_desc:      "Description",
+  cap_priority:  "Priority",
+  cap_source:    "Source",
+};
+
+var COS = [
+  {name:"Test",                  id:"rec2oXy9hZCyyS3qu"},
+  {name:"Jaffna Horticulture",   id:"recKl0Qp40ZoViPpJ"},
+  {name:"AiGrow",                id:"recV0Oak0Ru40FCtF"},
+  {name:"Saara Labs",            id:"recaNl4i18QR4iboK"},
+  {name:"A R Natural Export",    id:"recfDu1dqz6X51OJK"},
+  {name:"Navigata Foods",        id:"recgh9N7BJU5LO737"},
+  {name:"Seashore Gardens",      id:"recmkMq6L0CQ8prZb"},
+  {name:"CleanTech",             id:"recockH7360fqeHSH"},
+  {name:"E-Silk Route Ventures", id:"recyaHP0oaJAU9tkh"}
+];
+
+var PILLARS = [
+  "Leadership Capacity","Management Capacity","Ops Team / Staff","Supply Chain","Demand",
+  "Systems & Processes","Innovation","Financial Firepower","Product / Brand Equity","Governance & Culture"
+];
+
+var PILLAR_SUBS = [
+  "Founder / board / leadership pipeline",
+  "Leadership minus 1 — management layer",
+  "Team availability, turnover & capability",
+  "OTIF, supplier reliability, plant utilisation",
+  "Forecast accuracy, pipeline & customer demand",
+  "SOPs, performance mgmt, data & reporting systems",
+  "R&D, digital tools, tech adoption & product pipeline",
+  "Working capital, runway & financial firepower",
+  "Brand equity, product differentiation & TOM",
+  "Compliance, culture, governance & ESG"
+];
+
+var THRIVE = [
+  {id:"P2",name:"Purpose & Principles"},
+  {id:"E2",name:"Enabling Ecosystem"},
+  {id:"T2",name:"Transformative Tasks"},
+  {id:"R2",name:"Resilient Relationships"},
+  {id:"C2",name:"Conscious Customers"},
+  {id:"A2",name:"Abundant Assets"},
+  {id:"M2",name:"Methods to Market"},
+  {id:"I2",name:"Impactful Investments"},
+  {id:"V2",name:"Verifiable Value"}
+];
+
+var IRC_SECTIONS = [
+  "Team Development","Data Room & Due Diligence","Data Analytics",
+  "Market & Competition","Product Maturity","Marketing & Sales",
+  "Customer Growth","Traction & Investment"
+];
+
+var CAP_CATEGORIES = ["Leadership","Operations","Finance","Marketing","Technology","Legal","Other"];
+
+var SCP_THEMES = [
+  "Food Loss Reduction","Food Waste Reduction","Reduction of SUP",
+  "Sustainable Inputs","Environmental Impact","Worker Health & Safety",
+  "Gender Equity","Community Engagement","Knowledge Sharing",
+  "Sustainability Strategy","Performance Tracking","Digital Tools",
+  "Green Finance Access","Confidence in Scaling","Willingness to Advocate"
+];
+
+var ROLES = [
+  {id:"arj", label:"Arj Wignaraja",    color:"#0F6E56", bg:"#e0f5ec"},
+  {id:"cco", label:"CCO",              color:"#185FA5", bg:"#e6f1fb"},
+  {id:"pd",  label:"Program Director", color:"#854F0B", bg:"#fef3e2"}
+];
+
+var S = {
+  role:null, name:"", co:null, round:"Baseline",
+  scores:{}, pot:{}, conf:{}, notes:{},
+  ts:{}, tn:{},
+  irc:{}, ircNotes:{},
+  capNeeds:[],
+  type:"Fundamentals"
+};
+
+function el(id){ return document.getElementById(id); }
+
+function toast(m){
+  var t=el("toast"); t.textContent=m; t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); },3500);
+}
+
+function avg(a){
+  if(!a||!a.length) return 0;
+  var s=0; for(var i=0;i<a.length;i++) s+=a[i];
+  return Math.round(s/a.length);
+}
+
+function showV(n){
+  var vs=["h","s","d","r"];
+  for(var i=0;i<vs.length;i++){
+    var v=el("v"+vs[i]);
+    if(v) v.style.display=(vs[i]===n?"block":"none");
+  }
+}
+
+function mk(tag,props){
+  var e=document.createElement(tag);
+  if(props) Object.assign(e,props);
+  return e;
+}
+
+function mkEl(tag,cls,html){
+  var e=document.createElement(tag);
+  if(cls) e.className=cls;
+  if(html!==undefined) e.innerHTML=html;
+  return e;
+}
+
+function fg(labelText,inputEl){
+  var div=mkEl("div","fg");
+  var lbl=mkEl("label","fl"); lbl.textContent=labelText;
+  div.appendChild(lbl); div.appendChild(inputEl);
+  return div;
+}
+
+async function atGet(path){
+  var r=await fetch("https://api.airtable.com/v0/"+BASE+"/"+path,{
+    headers:{"Authorization":"Bearer "+KEY}
+  });
+  return r.json();
+}
+
+async function atPost(path,body){
+  var r=await fetch("https://api.airtable.com/v0/"+BASE+"/"+path,{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  });
+  return r.json();
+}
+
+function hour(){
+  var h=new Date().getHours();
+  return h<12?"morning":h<17?"afternoon":"evening";
+}
+
+function coName(id){
+  for(var i=0;i<COS.length;i++) if(COS[i].id===id) return COS[i].name;
+  return "";
+}
+
+function roleLabel(id){
+  for(var i=0;i<ROLES.length;i++) if(ROLES[i].id===id) return ROLES[i].label;
+  return "CCO";
+}
+
+async function init(){
+  renderHome(); showV("h");
+  try{
+    var r=await fetch("https://api.airtable.com/v0/meta/bases/"+BASE+"/tables",{
+      headers:{"Authorization":"Bearer "+KEY}
+    });
+    var d=await r.json();
+    el("cd").style.background=d.tables?"#1D9E75":"#E24B4A";
+    el("ct").textContent=d.tables?"Connected to Airtable":"Connection error";
+  }catch(e){
+    el("cd").style.background="#E24B4A";
+    el("ct").textContent="Check internet";
+  }
+}
+
+function renderHome(){
+  var wrap=el("vh"); wrap.innerHTML="";
+  wrap.appendChild(mkEl("div","",
+    "<div style='font-size:22px;font-weight:700;margin-bottom:5px'>Good "+hour()+"</div>"+
+    "<div style='font-size:14px;color:#666;margin-bottom:24px;line-height:1.6'>Select your role to get started.</div>"
+  ));
+  wrap.appendChild(mkEl("div","sec-lbl","Who are you?"));
+  var rgrid=mkEl("div","rgrid");
+  for(var i=0;i<ROLES.length;i++){
+    var r=ROLES[i];
+    var card=mkEl("div","rcard"+(S.role===r.id?" on":""));
+    card.innerHTML=
+      "<div style='width:36px;height:36px;border-radius:8px;background:"+r.bg+
+      ";display:flex;align-items:center;justify-content:center;font-weight:700;color:"+
+      r.color+";margin-bottom:9px;font-size:14px'>"+r.label.charAt(0)+"</div>"+
+      "<div style='font-size:13px;font-weight:600;color:"+(S.role===r.id?r.color:"#1a1a18")+
+      "'>"+r.label+"</div>";
+    card.dataset.rid=r.id; card.dataset.rlabel=r.label;
+    card.addEventListener("click",function(){ setRole(this.dataset.rid,this.dataset.rlabel); });
+    rgrid.appendChild(card);
+  }
+  wrap.appendChild(rgrid);
+  if(!S.role){
+    wrap.appendChild(mkEl("div","","<div style='font-size:13px;color:#aaa'>Select your role above to continue.</div>"));
+    return;
+  }
+  wrap.appendChild(mkEl("div","sec-lbl","What do you want to do?"));
+  var agrid=mkEl("div","agrid");
+  var actions=[
+    {ico:"📊",title:"Enter fundamentals scores",desc:"After the diagnostic call",pri:true,  fn:function(){startScore("Fundamentals");}},
+    {ico:"🌱",title:"Enter THRIVE scores",       desc:"After the masterclass",   pri:false, fn:function(){startScore("THRIVE");}},
+    {ico:"📋",title:"Enter IRC scores",          desc:"GIZ evaluation — Arj only",pri:false,fn:function(){startScore("IRC");}},
+    {ico:"🤝",title:"Enter consensus scores",desc:"Viranja — after the debrief call",pri:false,fn:function(){startScore("Consensus");}},
+    {ico:"🎯",title:"Log capacity needs",        desc:"Support needs identified", pri:false, fn:function(){startScore("Capacity");}},
+    {ico:"🌿",title:"Enter SCP indicators",desc:"SUP, food loss, gender equity etc — every round",pri:false,fn:function(){startScore("SCP");}},
+    {ico:"📈",title:"View dashboard",            desc:"Scores and spider charts",  pri:false, fn:function(){goDash();}},
+  ];
+  if(S.role==="arj"||S.role==="pd"){
+    actions.push({ico:"📄",title:"Generate report",desc:"AI-drafted in CET style",pri:false,fn:function(){goReport();}});
+  }
+  for(var i=0;i<actions.length;i++){
+    var a=actions[i];
+    var btn=mkEl("button","abtn"+(a.pri?" pri":""));
+    btn.innerHTML="<div class='abico'>"+a.ico+"</div><div><div class='abtitle'>"+a.title+"</div><div class='abdesc'>"+a.desc+"</div></div>";
+    btn.addEventListener("click",a.fn);
+    agrid.appendChild(btn);
+  }
+  wrap.appendChild(agrid);
+  wrap.appendChild(mkEl("div","sec-lbl","Companies in programme"));
+  var chips=mkEl("div",""); chips.style.cssText="display:flex;flex-wrap:wrap;gap:7px";
+  for(var i=0;i<COS.length;i++){
+    var chip=mkEl("div","");
+    chip.style.cssText="background:#fff;border:1px solid #e0dfd8;border-radius:20px;padding:5px 13px;font-size:12px;font-weight:500";
+    chip.textContent=COS[i].name;
+    chips.appendChild(chip);
+  }
+  wrap.appendChild(chips);
+}
+
+function setRole(id,label){
+  S.role=id; S.name=(id==="cco"?"":label);
+  renderHome();
+}
+
+function initScoreState(){
+  S.scores={}; S.pot={}; S.conf={}; S.notes={};
+  S.ts={}; S.tn={};
+  S.irc={}; S.ircNotes={};
+  S.scp={}; S.scpNotes={}; S.scpLinks={};
+  S.capNeeds=[];
+  for(var i=0;i<PILLARS.length;i++){ S.scores[i]=50; S.pot[i]=65; S.conf[i]="Medium"; S.notes[i]=""; }
+  for(var i=0;i<THRIVE.length;i++){ S.ts[THRIVE[i].id]=3; S.tn[THRIVE[i].id]=""; }
+  for(var i=0;i<IRC_SECTIONS.length;i++){ S.irc[i]=20; S.ircNotes[i]=""; }
+  for(var i=0;i<SCP_THEMES.length;i++){ S.scp[i]=3; S.scpNotes[i]=""; S.scpLinks[i]=""; }
+}
+
+function startScore(type){
+  S.type=type; initScoreState();
+  renderScoreV(); showV("s"); window.scrollTo(0,0);
+}
+
+function makeCoSelect(){
+  var sel=mk("select",{id:"inp-co"});
+  var o0=mk("option"); o0.value=""; o0.textContent="Select company"; sel.appendChild(o0);
+  for(var i=0;i<COS.length;i++){
+    var o=mk("option"); o.value=COS[i].id; o.textContent=COS[i].name;
+    if(COS[i].id===S.co) o.selected=true;
+    sel.appendChild(o);
+  }
+  sel.addEventListener("change",function(){ S.co=this.value; });
+  return sel;
+}
+
+function makeRoundSelect(){
+  var sel=mk("select",{id:"inp-rd"});
+  ["Baseline","Midpoint","Endpoint"].forEach(function(r){
+    var o=mk("option"); o.value=r; o.textContent=r;
+    if(r===S.round) o.selected=true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change",function(){ S.round=this.value; });
+  return sel;
+}
+
+function makeNameInput(){
+  var inp=mk("input");
+  inp.type="text"; inp.id="inp-name"; inp.value=S.name;
+  inp.placeholder="e.g. Viranja Jayawardena";
+  inp.addEventListener("input",function(){ S.name=this.value; });
+  return inp;
+}
+
+function makeSliderRow(labelText,valId,initVal,min,max,suffix,color,onInput){
+  var row=mkEl("div","srow");
+  var lbl=mkEl("span","slbl2"); lbl.textContent=labelText;
+  var inp=mk("input"); inp.type="range"; inp.min=min; inp.max=max; inp.step=1; inp.value=initVal;
+  var valEl=mkEl("span","sval"); valEl.id=valId; valEl.style.color=color;
+  valEl.textContent=initVal+suffix;
+  inp.addEventListener("input",function(){ valEl.textContent=this.value+suffix; onInput(parseInt(this.value)); });
+  row.appendChild(lbl); row.appendChild(inp); row.appendChild(valEl);
+  return row;
+}
+
+function makeConsensusRow(i){
+  var row=mkEl("div","prow");
+  var hd=mkEl("div","");
+  hd.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:4px";
+  var num=mkEl("span",""); num.style.cssText="background:#e0f5ec;color:#085041;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700";
+  num.textContent=i+1;
+  var nm=mkEl("span","pname"); nm.style.marginBottom="0"; nm.textContent=PILLARS[i];
+  hd.appendChild(num); hd.appendChild(nm); row.appendChild(hd);
+  var sub=mkEl("div",""); sub.style.cssText="font-size:11px;color:#aaa;margin-bottom:10px";
+  sub.textContent=PILLAR_SUBS[i]||""; row.appendChild(sub);
+  row.appendChild(makeSliderRow("Agreed score","csv"+i,S.scores[i],0,100,"%","#0F6E56",function(v){ S.scores[i]=v; }));
+  var commLbl=mkEl("label","fl"); commLbl.textContent="Final commentary (one sentence)";
+  var commInp=mk("input"); commInp.type="text";
+  commInp.placeholder="e.g. Strong leadership but succession planning is a gap...";
+  commInp.style.cssText="width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;font-size:12px;background:#fafaf8;margin-bottom:8px";
+  commInp.dataset.i=i;
+  commInp.addEventListener("input",function(){ S.notes[parseInt(this.dataset.i)]=this.value; });
+  var varLbl=mkEl("label","fl"); varLbl.textContent="Differing opinion (optional)";
+  var varInp=mk("input"); varInp.type="text";
+  varInp.placeholder="e.g. Arj scored 70 vs team avg 55 — difference due to...";
+  varInp.style.cssText="width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;font-size:12px;background:#fafaf8";
+  varInp.dataset.i=i;
+  varInp.addEventListener("input",function(){ S.pot[parseInt(this.dataset.i)]=this.value; });
+  row.appendChild(commLbl); row.appendChild(commInp);
+  row.appendChild(varLbl); row.appendChild(varInp);
+  return row;
+}
+
+function makeSCPRow(i){
+  var row=mkEl("div","prow");
+  row.appendChild(mkEl("div","pname",(i+1)+". "+SCP_THEMES[i]));
+  row.appendChild(makeSliderRow("Score (1–5)","scpv"+i,S.scp[i],1,5," / 5","#1D9E75",function(v){ S.scp[i]=v; }));
+  var ni=mk("input"); ni.type="text"; ni.placeholder="Evidence or observation (optional)";
+  ni.style.cssText="font-size:12px;margin-top:8px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;background:#fafaf8";
+  ni.dataset.i=i;
+  ni.addEventListener("input",function(){ S.scpNotes[parseInt(this.dataset.i)]=this.value; });
+  row.appendChild(ni);
+  var li=mk("input"); li.type="text"; li.placeholder="Evidence link (optional)";
+  li.style.cssText="font-size:12px;margin-top:6px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;background:#fafaf8";
+  li.dataset.i=i;
+  li.addEventListener("input",function(){ S.scpLinks[parseInt(this.dataset.i)]=this.value; });
+  row.appendChild(li);
+  return row;
+}
+
+function makeFundRow(i){
+  var row=mkEl("div","prow");
+  row.appendChild(mkEl("div","pname",(i+1)+". "+PILLARS[i]));
+  var sub=mkEl("div",""); sub.style.cssText="font-size:11px;color:#aaa;margin-bottom:8px;margin-top:-4px";
+  sub.textContent=PILLAR_SUBS[i]||""; row.appendChild(sub);
+  row.appendChild(makeSliderRow("Current score","sv"+i,S.scores[i],0,100,"%","#0F6E56",function(v){ S.scores[i]=v; }));
+  row.appendChild(makeSliderRow("Scale-up potential","pv"+i,S.pot[i],0,100,"%","#639922",function(v){ S.pot[i]=v; }));
+  row.appendChild(mkEl("div","","<div style='margin:6px 0 3px;font-size:11px;color:#aaa'>Confidence:</div>"));
+  var crow=mkEl("div","crow");
+  var confs=[{l:"High",c:"ch"},{l:"Medium",c:"cm"},{l:"Low",c:"cl"}];
+  for(var j=0;j<confs.length;j++){
+    var cb=mkEl("button","cbtn"+(S.conf[i]===confs[j].l?" "+confs[j].c:""));
+    cb.textContent=confs[j].l; cb.dataset.i=i; cb.dataset.v=confs[j].l; cb.dataset.c=confs[j].c;
+    cb.addEventListener("click",function(){
+      S.conf[parseInt(this.dataset.i)]=this.dataset.v;
+      this.parentNode.querySelectorAll(".cbtn").forEach(function(s){ s.className="cbtn"; });
+      this.className="cbtn "+this.dataset.c;
+    });
+    crow.appendChild(cb);
+  }
+  row.appendChild(crow);
+  var ni=mk("input"); ni.type="text"; ni.placeholder="Key observation or gap (optional)";
+  ni.style.cssText="font-size:12px;margin-top:8px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;background:#fafaf8";
+  ni.dataset.i=i;
+  ni.addEventListener("input",function(){ S.notes[parseInt(this.dataset.i)]=this.value; });
+  row.appendChild(ni);
+  return row;
+}
+
+function makeThriveRow(t){
+  var row=mkEl("div","prow");
+  var hd=mkEl("div",""); hd.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:8px";
+  var bdg=mkEl("span","bdg"); bdg.textContent=t.id;
+  var nm=mkEl("span","pname"); nm.style.marginBottom="0"; nm.textContent=t.name;
+  hd.appendChild(bdg); hd.appendChild(nm); row.appendChild(hd);
+  row.appendChild(makeSliderRow("Score (1–5)","tv"+t.id,S.ts[t.id],1,5," / 5","#0F6E56",function(v){ S.ts[t.id]=v; }));
+  var ni=mk("input"); ni.type="text"; ni.placeholder="Findings or evidence (optional)";
+  ni.style.cssText="font-size:12px;margin-top:8px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;background:#fafaf8";
+  ni.dataset.tid=t.id;
+  ni.addEventListener("input",function(){ S.tn[this.dataset.tid]=this.value; });
+  row.appendChild(ni);
+  return row;
+}
+
+function makeIRCRow(i){
+  var row=mkEl("div","prow");
+  row.appendChild(mkEl("div","pname",IRC_SECTIONS[i]));
+  row.appendChild(mkEl("div","","<div style='font-size:11px;color:#aaa;margin-bottom:8px'>Score out of 40. Will normalise to /10 automatically.</div>"));
+  row.appendChild(makeSliderRow("Raw score","iv"+i,S.irc[i],0,40," / 40","#D85A30",function(v){ S.irc[i]=v; }));
+  var ni=mk("input"); ni.type="text"; ni.placeholder="Assessor feedback (optional)";
+  ni.style.cssText="font-size:12px;margin-top:8px;width:100%;padding:7px 10px;border-radius:7px;border:1px solid #ddd;font-family:inherit;background:#fafaf8";
+  ni.dataset.i=i;
+  ni.addEventListener("input",function(){ S.ircNotes[parseInt(this.dataset.i)]=this.value; });
+  row.appendChild(ni);
+  return row;
+}
+
+function makeCapSection(){
+  var wrap=mkEl("div","");
+  var addBtn=mkEl("button","");
+  addBtn.style.cssText="margin-top:12px;padding:8px 16px;border-radius:8px;border:1px dashed #0F6E56;background:transparent;color:#0F6E56;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%";
+  addBtn.textContent="+ Add another need";
+  addBtn.addEventListener("click",function(e){ e.preventDefault(); addCapRow(); });
+  wrap.appendChild(addBtn);
+  function addCapRow(){
+    var row=mkEl("div",""); row.style.cssText="border-bottom:1px solid #f0efe8;padding:14px 0";
+    var catSel=mk("select");
+    catSel.style.cssText="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;font-family:inherit;margin-bottom:8px";
+    for(var i=0;i<CAP_CATEGORIES.length;i++){
+      var o=mk("option"); o.value=CAP_CATEGORIES[i]; o.textContent=CAP_CATEGORIES[i]; catSel.appendChild(o);
+    }
+    var descTa=mk("textarea");
+    descTa.style.cssText="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;margin-bottom:8px";
+    descTa.placeholder="Describe the specific need...";
+    var priSel=mk("select");
+    priSel.style.cssText="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;font-family:inherit;margin-bottom:8px";
+    ["High","Medium","Low"].forEach(function(p){ var o=mk("option");o.value=p;o.textContent=p;priSel.appendChild(o); });
+    var srcSel=mk("select");
+    srcSel.style.cssText="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;font-family:inherit";
+    ["Assessor Identified","Company Self-identified"].forEach(function(s){ var o=mk("option");o.value=s;o.textContent=s;srcSel.appendChild(o); });
+    var catLbl=mkEl("label","fl"); catLbl.textContent="Category";
+    var descLbl=mkEl("label","fl"); descLbl.textContent="Description";
+    var priLbl=mkEl("label","fl"); priLbl.textContent="Priority";
+    var srcLbl=mkEl("label","fl"); srcLbl.textContent="Source";
+    row.appendChild(catLbl); row.appendChild(catSel);
+    row.appendChild(descLbl); row.appendChild(descTa);
+    row.appendChild(priLbl); row.appendChild(priSel);
+    row.appendChild(srcLbl); row.appendChild(srcSel);
+    var idx=S.capNeeds.length;
+    S.capNeeds.push({cat:"Leadership",desc:"",pri:"High",src:"Assessor Identified"});
+    catSel.addEventListener("change",function(){ S.capNeeds[idx].cat=this.value; });
+    descTa.addEventListener("input",function(){ S.capNeeds[idx].desc=this.value; });
+    priSel.addEventListener("change",function(){ S.capNeeds[idx].pri=this.value; });
+    srcSel.addEventListener("change",function(){ S.capNeeds[idx].src=this.value; });
+    wrap.insertBefore(row,addBtn);
+  }
+  addCapRow();
+  return wrap;
+}
+
+function renderScoreV(){
+  var wrap=el("vs"); wrap.innerHTML="";
+  var bb=mkEl("button","btnb"); bb.textContent="← Back to home";
+  bb.addEventListener("click",function(){ showV("h"); renderHome(); });
+  wrap.appendChild(bb);
+  var titles={Fundamentals:"Business fundamentals assessment",THRIVE:"THRIVE canvas assessment",IRC:"IRC / GIZ evaluation scoring",Capacity:"Capacity needs log",SCP:"SCP indicators — EU Output 2.2",Consensus:"Consensus scores — post debrief"};
+  var subs={
+    Fundamentals:"Rate each of the 10 pillars after the diagnostic call. Your scores are saved independently from others.",
+    THRIVE:"Rate each THRIVE pillar 1 to 5. Do this after the masterclass only.",
+    IRC:"Score each GIZ evaluation section out of 40. For Arj to complete after full diagnostic.",
+    Capacity:"Log what capacity building support this company needs.",
+    SCP:"Rate each of the 15 SCP value-add themes. Fill at every round — Baseline, Midpoint and Endpoint.",
+    Consensus:"Enter the agreed consensus scores after the debrief call. Viranja fills this based on debrief notes. One entry per company per round."
+  };
+  var card=mkEl("div","card");
+  card.appendChild(mkEl("div","ctitle",titles[S.type]));
+  card.appendChild(mkEl("div","csub",subs[S.type]));
+  card.appendChild(fg("Your full name",makeNameInput()));
+  card.appendChild(fg("Company being assessed",makeCoSelect()));
+  card.appendChild(fg("Assessment round",makeRoundSelect()));
+  wrap.appendChild(card);
+  var card2=mkEl("div","card"); card2.style.marginTop="14px";
+  if(S.type==="Fundamentals"){
+    card2.appendChild(mkEl("div","ctitle","Rate all 10 pillars (0 = critical gap, 100 = excellent)"));
+    for(var i=0;i<PILLARS.length;i++) card2.appendChild(makeFundRow(i));
+  } else if(S.type==="THRIVE"){
+    card2.appendChild(mkEl("div","ctitle","Rate each THRIVE pillar (1 = not started, 5 = fully embedded)"));
+    for(var i=0;i<THRIVE.length;i++) card2.appendChild(makeThriveRow(THRIVE[i]));
+  } else if(S.type==="IRC"){
+    card2.appendChild(mkEl("div","ctitle","Score each IRC section (0 to 40)"));
+    for(var i=0;i<IRC_SECTIONS.length;i++) card2.appendChild(makeIRCRow(i));
+  } else if(S.type==="Consensus"){
+    card2.appendChild(mkEl("div","ctitle","Agreed consensus scores — enter one per pillar"));
+    card2.appendChild(mkEl("div","csub","Based on debrief call notes. Enter the team agreed final score, a one sentence commentary, and note any differing opinions."));
+    for(var i=0;i<PILLARS.length;i++) card2.appendChild(makeConsensusRow(i));
+  } else if(S.type==="SCP"){
+    card2.appendChild(mkEl("div","ctitle","Rate all 15 SCP themes (1 = not started, 5 = fully achieved)"));
+    card2.appendChild(mkEl("div","csub","Score each theme based on what you observed during the diagnostic. Add evidence or notes where you have them."));
+    for(var i=0;i<SCP_THEMES.length;i++) card2.appendChild(makeSCPRow(i));
+  } else if(S.type==="Capacity"){
+    card2.appendChild(mkEl("div","ctitle","Log capacity needs"));
+    card2.appendChild(makeCapSection());
+  }
+  wrap.appendChild(card2);
+  var sb=mkEl("button","btnp"); sb.id="sub-btn"; sb.textContent="Submit assessment";
+  sb.addEventListener("click",doSubmit);
+  wrap.appendChild(sb);
+  var note=mkEl("div",""); note.style.cssText="font-size:11px;color:#aaa;text-align:center;margin-top:8px";
+  note.textContent="Your entry is saved individually and does not overwrite anyone else.";
+  wrap.appendChild(note);
+}
+
+async function doSubmit(){
+  if(!S.co){ toast("Please select a company"); return; }
+  if(!S.name.trim()){ toast("Please enter your name"); return; }
+  var btn=el("sub-btn"); btn.disabled=true; btn.innerHTML="<span class='spn'></span>Saving to Airtable...";
+  try{
+    var role=roleLabel(S.role);
+    var cn=coName(S.co);
+    var fields={};
+    fields[F.rec_name]    = cn+" - "+S.round+" ("+S.type+")";
+    fields[F.rec_company] = [S.co];
+    fields[F.rec_type]    = S.round;
+    fields[F.rec_date]    = new Date().toISOString().split("T")[0];
+    fields[F.rec_status]  = "Draft";
+    fields[F.rec_notes]   = S.type+" assessment by "+S.name;
+    var ar=await atPost(T_ASSESSMENTS,{fields:fields});
+    var aId=ar.id;
+    if(!aId) throw new Error("Could not create assessment record. Check Airtable field names.");
+
+    if(S.type==="Fundamentals"){
+      var recs=[];
+      for(var i=0;i<PILLARS.length;i++){
+        var f={};
+        f[F.fund_record]     = [aId];
+        f[F.fund_assessor]   = S.name;
+        f[F.fund_pillar]     = PILLARS[i];
+        f[F.fund_score]      = S.scores[i];
+        f[F.fund_potential]  = S.pot[i];
+        f[F.fund_commentary] = S.notes[i]||"";
+        f[F.fund_confidence] = S.conf[i]||"Medium";
+        recs.push({fields:f});
+      }
+      for(var i=0;i<recs.length;i+=10){
+        await atPost(T_FUNDAMENTALS,{records:recs.slice(i,i+10)});
+      }
+
+    } else if(S.type==="THRIVE"){
+      var recs=[];
+      for(var i=0;i<THRIVE.length;i++){
+        var t=THRIVE[i]; var f={};
+        f[F.thrive_record]   = [aId];
+        f[F.thrive_assessor] = S.name;
+        f[F.thrive_pillar]   = t.name;
+        f[F.thrive_score]    = S.ts[t.id];
+        f[F.thrive_findings] = S.tn[t.id]||"";
+        recs.push({fields:f});
+      }
+      await atPost(T_THRIVE,{records:recs});
+
+    } else if(S.type==="Consensus"){
+      var recs=[];
+      for(var i=0;i<PILLARS.length;i++){
+        var f={};
+        f[F.con_record]   = [aId];
+        f[F.con_pillar]   = PILLARS[i];
+        f[F.con_score]    = S.scores[i];
+        f[F.con_comment]  = S.notes[i]||"";
+        f[F.con_variance] = S.pot[i]||"";
+        f[F.con_agreed]   = S.name;
+        f[F.con_date]     = new Date().toISOString().split("T")[0];
+        recs.push({fields:f});
+      }
+      for(var i=0;i<recs.length;i+=10){
+        await atPost(T_CONSENSUS,{records:recs.slice(i,i+10)});
+      }
+
+    } else if(S.type==="IRC"){
+      var recs=[];
+      for(var i=0;i<IRC_SECTIONS.length;i++){
+        var f={};
+        f[F.irc_record]   = [aId];
+        f[F.irc_assessor] = S.name;
+        f[F.irc_section]  = IRC_SECTIONS[i];
+        f[F.irc_raw]      = S.irc[i];
+        f[F.irc_feedback] = S.ircNotes[i]||"";
+        recs.push({fields:f});
+      }
+      await atPost(T_IRC,{records:recs});
+
+    } else if(S.type==="Consensus"){
+    card2.appendChild(mkEl("div","ctitle","Agreed consensus scores — enter one per pillar"));
+    card2.appendChild(mkEl("div","csub","Based on debrief call notes. Enter the team agreed final score, a one sentence commentary, and note any differing opinions."));
+    for(var i=0;i<PILLARS.length;i++) card2.appendChild(makeConsensusRow(i));
+  } else if(S.type==="SCP"){
+      var recs=[];
+      for(var i=0;i<SCP_THEMES.length;i++){
+        var f={};
+        f[F.scp_record] = [aId];
+        f[F.scp_theme]  = SCP_THEMES[i];
+        f[F.scp_score]  = S.scp[i];
+        f[F.scp_notes]  = S.scpNotes[i]||"";
+        f[F.scp_link]   = S.scpLinks[i]||"";
+        recs.push({fields:f});
+      }
+      for(var i=0;i<recs.length;i+=10){
+        await atPost(T_SCP,{records:recs.slice(i,i+10)});
+      }
+
+    } else if(S.type==="Capacity"){
+      var recs=[];
+      for(var i=0;i<S.capNeeds.length;i++){
+        var n=S.capNeeds[i];
+        if(!n.desc.trim()) continue;
+        var f={};
+        f[F.cap_record]   = [aId];
+        f[F.cap_category] = n.cat;
+        f[F.cap_desc]     = n.desc;
+        // Priority and Source added only if field options confirmed in Airtable
+        if(n.pri) f[F.cap_priority] = n.pri;
+        if(n.src) f[F.cap_source]   = n.src;
+        recs.push({fields:f});
+      }
+      if(!recs.length) throw new Error("Please add at least one need with a description.");
+      await atPost(T_CAPACITY,{records:recs});
+    }
+
+    toast("Saved to Airtable!");
+    setTimeout(function(){ showV("h"); renderHome(); window.scrollTo(0,0); },1500);
+
+  }catch(e){
+    toast("Error: "+e.message);
+    btn.disabled=false; btn.textContent="Submit assessment";
+  }
+}
+
+function drawSpider(id,eV,cV,aV,labels){
+  var cv=el(id); if(!cv) return;
+  var ctx=cv.getContext("2d");
+  var n=labels.length, cx=cv.width/2, cy=cv.height/2, r=Math.min(cx,cy)-36;
+  function ang(i){ return (Math.PI*2*i/n)-Math.PI/2; }
+  ctx.clearRect(0,0,cv.width,cv.height);
+  for(var f=0.25;f<=1.01;f+=0.25){
+    ctx.beginPath();
+    for(var i=0;i<n;i++){ var a=ang(i),x=cx+r*f*Math.cos(a),y=cy+r*f*Math.sin(a); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    ctx.closePath(); ctx.strokeStyle="rgba(0,0,0,0.07)"; ctx.lineWidth=0.8; ctx.stroke();
+  }
+  for(var i=0;i<n;i++){
+    var a=ang(i); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
+    ctx.strokeStyle="rgba(0,0,0,0.08)"; ctx.lineWidth=0.6; ctx.stroke();
+  }
+  function ds(vals,sc,fc,lw){
+    if(!vals||!vals.length) return;
+    ctx.beginPath();
+    for(var i=0;i<vals.length;i++){ var a=ang(i),fv=vals[i]/100,x=cx+r*fv*Math.cos(a),y=cy+r*fv*Math.sin(a); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    ctx.closePath(); ctx.fillStyle=fc; ctx.fill(); ctx.strokeStyle=sc; ctx.lineWidth=lw; ctx.stroke();
+  }
+  ds(aV,"#B4B2A9","rgba(180,178,169,0.08)",1.2);
+  ds(eV,"#0F6E56","rgba(15,110,86,0.12)",2);
+  ds(cV,"#D85A30","rgba(216,90,48,0.10)",2);
+  for(var i=0;i<n;i++){
+    var a=ang(i),lx=cx+(r+24)*Math.cos(a),ly=cy+(r+24)*Math.sin(a);
+    var lb=labels[i]; if(lb.length>12) lb=lb.slice(0,11)+"...";
+    ctx.font="9px -apple-system,sans-serif"; ctx.fillStyle="#777";
+    ctx.textAlign=Math.cos(a)>0.15?"left":Math.cos(a)<-0.15?"right":"center";
+    ctx.textBaseline=Math.sin(a)>0.15?"top":Math.sin(a)<-0.15?"bottom":"middle";
+    ctx.fillText(lb,lx,ly);
+  }
+}
+
+async function goDash(){
+  showV("d"); var wrap=el("vd"); wrap.innerHTML="";
+  var bb=mkEl("button","btnb"); bb.textContent="← Back to home";
+  bb.addEventListener("click",function(){ showV("h"); renderHome(); });
+  wrap.appendChild(bb);
+  var tabs=mkEl("div","ntabs");
+  var t1=mkEl("button","ntab on"); t1.id="t-co"; t1.textContent="Cohort";
+  t1.addEventListener("click",function(){ switchTab("co"); });
+  var t2=mkEl("button","ntab"); t2.id="t-det"; t2.textContent="Company detail";
+  t2.addEventListener("click",function(){ switchTab("det"); });
+  tabs.appendChild(t1); tabs.appendChild(t2); wrap.appendChild(tabs);
+  var dco=mkEl("div",""); dco.id="d-co";
+  var mg=mkEl("div","mgrid");
+  mg.innerHTML=
+    "<div class='mc'><div class='mlbl'>Companies</div><div class='mval' style='color:#0F6E56'>"+COS.length+"</div></div>"+
+    "<div class='mc'><div class='mlbl'>Assessors</div><div class='mval' style='color:#185FA5'>3</div></div>"+
+    "<div class='mc'><div class='mlbl'>Rounds</div><div class='mval' style='color:#854F0B'>3</div></div>";
+  dco.appendChild(mg);
+  var crd=mkEl("div","card");
+  var ct=mkEl("div","ctitle"); ct.textContent="All companies"; ct.style.marginBottom="14px";
+  crd.appendChild(ct);
+  for(var i=0;i<COS.length;i++){
+    var row=mkEl("div",""); row.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f4f0";
+    var nm=mkEl("span",""); nm.style.cssText="font-size:13px;font-weight:600"; nm.textContent=COS[i].name;
+    var pb=mkEl("button","pill"); pb.textContent="View scores";
+    pb.dataset.coid=COS[i].id; pb.dataset.coname=COS[i].name;
+    pb.addEventListener("click",function(){ loadDet(this.dataset.coid,this.dataset.coname); switchTab("det"); });
+    row.appendChild(nm); row.appendChild(pb); crd.appendChild(row);
+  }
+  dco.appendChild(crd); wrap.appendChild(dco);
+  var ddet=mkEl("div",""); ddet.id="d-det"; ddet.style.display="none";
+  var pills=mkEl("div",""); pills.style.cssText="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px";
+  for(var i=0;i<COS.length;i++){
+    var pb=mkEl("button","pill"); pb.textContent=COS[i].name;
+    pb.dataset.coid=COS[i].id; pb.dataset.coname=COS[i].name;
+    pb.addEventListener("click",function(){ loadDet(this.dataset.coid,this.dataset.coname); });
+    pills.appendChild(pb);
+  }
+  ddet.appendChild(pills);
+  var dc=mkEl("div",""); dc.id="det-con";
+  dc.innerHTML="<div style='font-size:13px;color:#aaa;padding:20px 0'>Select a company above.</div>";
+  ddet.appendChild(dc); wrap.appendChild(ddet);
+}
+
+function switchTab(t){
+  el("t-co").className="ntab"+(t==="co"?" on":"");
+  el("t-det").className="ntab"+(t==="det"?" on":"");
+  el("d-co").style.display=t==="co"?"block":"none";
+  el("d-det").style.display=t==="det"?"block":"none";
+}
+
+async function loadDet(coId,coName){
+  switchTab("det");
+  var dc=el("det-con");
+  dc.innerHTML="<div class='ld'><div class='sp2'></div>Loading "+coName+"...</div>";
+  try{
+    var ad=await atGet(T_ASSESSMENTS+"?maxRecords=100");
+    var ass=(ad.records||[]).filter(function(r){
+      var co=r.fields["Company"]||[];
+      return co.indexOf(coId)>-1;
+    });
+    if(!ass.length){
+      dc.innerHTML="<div class='card'><div style='font-size:13px;color:#aaa;padding:12px'>No assessments yet for "+coName+".</div></div>";
+      return;
+    }
+    var fr=[],tr=[],ir=[],cr=[],sr=[];
+    // Airtable linked record filtering is unreliable via API
+    // Fetch all records from each table and filter client-side by assessment record IDs
+    var assIds=ass.map(function(a){return a.id;});
+    function filterByAssId(records){
+      return records.filter(function(r){
+        var ar=r.fields["Assessment Record"]||[];
+        return ar.some ? ar.some(function(id){return assIds.indexOf(id)>-1;}) : assIds.indexOf(ar)>-1;
+      });
+    }
+    async function fetchAll(tbl){
+      var r=await fetch("https://api.airtable.com/v0/"+BASE+"/"+tbl+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}});
+      var d=await r.json(); return filterByAssId(d.records||[]);
+    }
+    fr=await fetchAll(T_FUNDAMENTALS);
+    tr=await fetchAll(T_THRIVE);
+    ir=await fetchAll(T_IRC);
+    sr=await fetchAll(T_SCP);
+    cr=await fetchAll(T_CAPACITY);
+    var pm={};
+    for(var i=0;i<fr.length;i++){
+      var pn=fr[i].fields[F.fund_pillar], sc=fr[i].fields[F.fund_score];
+      if(!pn||sc==null) continue;
+      if(!pm[pn]) pm[pn]=[]; pm[pn].push(sc);
+    }
+    var eT={},cT={},aT={};
+    for(var i=0;i<tr.length;i++){
+      var pn=tr[i].fields[F.thrive_pillar], sc=tr[i].fields[F.thrive_score], rl=tr[i].fields[F.thrive_assessor]||"";
+      if(!pn||sc==null) continue;
+      // Use pillar name to key (no Pillar Code in Airtable)
+      // Map pillar name back to id for display
+      var tid=null;
+      for(var j=0;j<THRIVE.length;j++){ if(THRIVE[j].name===pn){ tid=THRIVE[j].id; break; } }
+      if(!tid) continue;
+      if(!aT[tid]) aT[tid]=[]; aT[tid].push(sc);
+      // Distinguish company vs expert by assessor name matching company name
+      var isCompany=false;
+      for(var j=0;j<COS.length;j++){ if(COS[j].id===coId && COS[j].name===rl){ isCompany=true; break; } }
+      if(isCompany){ if(!cT[tid]) cT[tid]=[]; cT[tid].push(sc); }
+      else { if(!eT[tid]) eT[tid]=[]; eT[tid].push(sc); }
+    }
+    var ircMap={};
+    for(var i=0;i<ir.length;i++){
+      var sec=ir[i].fields[F.irc_section], sc=ir[i].fields[F.irc_raw];
+      if(!sec||sc==null) continue;
+      if(!ircMap[sec]) ircMap[sec]=[]; ircMap[sec].push(sc);
+    }
+    var hasC=Object.keys(cT).length>0;
+    var allF=[]; var pmk=Object.keys(pm);
+    for(var i=0;i<pmk.length;i++) allF=allF.concat(pm[pmk[i]]);
+    var overall=avg(allF);
+    var fLbls=[],fVals=[];
+    for(var i=0;i<PILLARS.length;i++){
+      if(pm[PILLARS[i]]){ fLbls.push(PILLARS[i].split(" ").slice(0,2).join(" ")); fVals.push(avg(pm[PILLARS[i]])); }
+    }
+    var eV=[],cV=[],aV=[],tLbls=[];
+    for(var i=0;i<THRIVE.length;i++){
+      tLbls.push(THRIVE[i].id);
+      eV.push(eT[THRIVE[i].id]?avg(eT[THRIVE[i].id])*20:0);
+      cV.push(cT[THRIVE[i].id]?avg(cT[THRIVE[i].id])*20:0);
+      aV.push(aT[THRIVE[i].id]?avg(aT[THRIVE[i].id])*20:0);
+    }
+    dc.innerHTML="";
+    var c1=mkEl("div","card");
+    c1.innerHTML="<div class='ctitle'>"+coName+"</div>"+
+      "<div class='mgrid' style='margin-top:12px'>"+
+      "<div class='mc'><div class='mlbl'>Avg fund score</div><div class='mval' style='color:#0F6E56'>"+overall+"%</div></div>"+
+      "<div class='mc'><div class='mlbl'>Sessions</div><div class='mval' style='color:#185FA5'>"+ass.length+"</div></div>"+
+      "<div class='mc'><div class='mlbl'>Capacity needs</div><div class='mval' style='color:#854F0B'>"+cr.length+"</div></div>"+
+      "</div>";
+    dc.appendChild(c1);
+    if(fVals.length){
+      var c2=mkEl("div","card"); c2.style.marginTop="14px";
+      c2.innerHTML="<div class='ctitle'>Fundamentals spider</div><div class='csub'>Averaged across all assessors.</div>";
+      var cv1=mk("canvas"); cv1.id="fund-cv"; cv1.width=280; cv1.height=280; cv1.style="margin:0 auto 16px";
+      c2.appendChild(cv1);
+      for(var i=0;i<PILLARS.length;i++){
+        if(!pm[PILLARS[i]]) continue;
+        var v=avg(pm[PILLARS[i]]); var col=v>=70?"#1D9E75":v>=50?"#BA7517":"#E24B4A";
+        var br=mkEl("div","brow");
+        br.innerHTML="<div class='btop'><span>"+PILLARS[i]+"</span><span style='font-weight:700;color:"+col+"'>"+v+"%</span></div>"+
+          "<div class='btrk'><div class='bfil' style='width:"+v+"%;background:"+col+"'></div></div>";
+        c2.appendChild(br);
+      }
+      dc.appendChild(c2);
+    }
+    if(tr.length){
+      var c3=mkEl("div","card"); c3.style.marginTop="14px";
+      c3.innerHTML="<div class='ctitle'>THRIVE — expert vs company</div>"+
+        "<div class='csub'>"+(hasC?"Green = expert | Orange = company self-assessment | Grey = all assessors":"No company self-assessment yet.")+"</div>";
+      var cv2=mk("canvas"); cv2.id="thrive-cv"; cv2.width=300; cv2.height=300; cv2.style="margin:0 auto";
+      c3.appendChild(cv2);
+      var leg=mkEl("div","leg");
+      leg.innerHTML="<div class='li'><div class='ldot' style='background:#0F6E56'></div>Expert</div>"+
+        (hasC?"<div class='li'><div class='ldot' style='background:#D85A30'></div>Company</div>":"")+
+        "<div class='li'><div class='ldot' style='background:#B4B2A9'></div>All assessors</div>";
+      c3.appendChild(leg);
+      for(var i=0;i<THRIVE.length;i++){
+        var t=THRIVE[i]; if(!aT[t.id]) continue;
+        var ev=eT[t.id]?avg(eT[t.id]):0;
+        var cv=cT[t.id]?avg(cT[t.id]):0;
+        var diff=(hasC&&cv)?ev-cv:null;
+        var gc=diff!==null?(Math.abs(diff)>=2?"#E24B4A":Math.abs(diff)>=1?"#BA7517":"#1D9E75"):"#aaa";
+        var pr=mkEl("div",""); pr.style.cssText="padding:10px 0;border-bottom:1px solid #f5f4f0";
+        pr.innerHTML=
+          "<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>"+
+          "<div><span class='bdg'>"+t.id+"</span> <span style='font-size:12px;font-weight:600'>"+t.name+"</span></div>"+
+          "<div style='font-size:11px;display:flex;gap:8px'>"+
+          "<span style='color:#0F6E56;font-weight:600'>Expert: "+ev+"/5</span>"+
+          (hasC&&cv?"<span style='color:#D85A30;font-weight:600'>Company: "+cv+"/5</span>":"")+
+          (diff!==null?"<span style='color:"+gc+";font-weight:600'>Gap: "+(diff>0?"+":"")+diff+"</span>":"")+
+          "</div></div>"+
+          "<div class='btrk' style='height:4px;margin-bottom:3px'><div class='bfil' style='width:"+(ev*20)+"%;background:#0F6E56'></div></div>"+
+          (hasC&&cv?"<div class='btrk' style='height:4px'><div class='bfil' style='width:"+(cv*20)+"%;background:#D85A30'></div></div>":"");
+        c3.appendChild(pr);
+      }
+      dc.appendChild(c3);
+    }
+    if(Object.keys(ircMap).length){
+      var c4=mkEl("div","card"); c4.style.marginTop="14px";
+      c4.innerHTML="<div class='ctitle'>IRC / GIZ scores</div><div class='csub'>Normalised out of 10 per section.</div>";
+      var ircTotal=0,ircCount=0;
+      for(var i=0;i<IRC_SECTIONS.length;i++){
+        if(!ircMap[IRC_SECTIONS[i]]) continue;
+        var v=avg(ircMap[IRC_SECTIONS[i]]);
+        var norm=Math.round((v/40)*10);
+        ircTotal+=norm; ircCount++;
+        var col=norm>=7?"#1D9E75":norm>=5?"#BA7517":"#E24B4A";
+        var br=mkEl("div","brow");
+        br.innerHTML="<div class='btop'><span>"+IRC_SECTIONS[i]+"</span><span style='font-weight:700;color:"+col+"'>"+norm+" / 10</span></div>"+
+          "<div class='btrk'><div class='bfil' style='width:"+(norm*10)+"%;background:"+col+"'></div></div>";
+        c4.appendChild(br);
+      }
+      if(ircCount){ var tot=mkEl("div",""); tot.style.cssText="font-size:12px;color:#888;margin-top:8px"; tot.textContent="Total: "+ircTotal+" / "+(ircCount*10); c4.appendChild(tot); }
+      dc.appendChild(c4);
+    }
+    if(cr.length){
+      var c5=mkEl("div","card"); c5.style.marginTop="14px";
+      c5.innerHTML="<div class='ctitle'>Capacity needs ("+cr.length+")</div><div class='csub'>Logged by assessors and/or company.</div>";
+      for(var i=0;i<cr.length;i++){
+        var n=cr[i].fields;
+        var pri=n[F.cap_priority]||"";
+        var priCol=pri==="High"?"#E24B4A":pri==="Medium"?"#BA7517":"#1D9E75";
+        var row=mkEl("div",""); row.style.cssText="padding:10px 0;border-bottom:1px solid #f5f4f0";
+        row.innerHTML=
+          "<div style='display:flex;align-items:center;gap:8px;margin-bottom:4px'>"+
+          "<span style='background:#e6f1fb;color:#0C447C;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600'>"+(n[F.cap_category]||"")+"</span>"+
+          "<span style='background:"+priCol+"22;color:"+priCol+";padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600'>"+pri+"</span>"+
+          "</div>"+
+          "<div style='font-size:13px;color:#1a1a18;line-height:1.5'>"+(n[F.cap_desc]||"")+"</div>"+
+          "<div style='font-size:11px;color:#aaa;margin-top:3px'>"+(n[F.cap_source]||"")+"</div>";
+        c5.appendChild(row);
+      }
+      dc.appendChild(c5);
+    }
+    if(sr.length){
+      var scpMap={};
+      for(var i=0;i<sr.length;i++){
+        var tn=sr[i].fields[F.scp_theme],sc=sr[i].fields[F.scp_score];
+        if(!tn||sc==null) continue;
+        if(!scpMap[tn]) scpMap[tn]=[]; scpMap[tn].push(sc);
+      }
+      var c6=mkEl("div","card"); c6.style.marginTop="14px";
+      c6.innerHTML="<div class='ctitle'>SCP indicators — EU Output 2.2</div><div class='csub'>Averaged across all CCO entries.</div>";
+      for(var i=0;i<SCP_THEMES.length;i++){
+        if(!scpMap[SCP_THEMES[i]]) continue;
+        var v=avg(scpMap[SCP_THEMES[i]]);
+        var col=v>=4?"#1D9E75":v>=3?"#BA7517":"#E24B4A";
+        var br=mkEl("div","brow");
+        br.innerHTML="<div class='btop'><span style='font-size:12px'>"+SCP_THEMES[i]+"</span><span style='font-weight:700;color:"+col+"'>"+v+" / 5</span></div>"+
+          "<div class='btrk'><div class='bfil' style='width:"+(v*20)+"%;background:"+col+"'></div></div>";
+        c6.appendChild(br);
+      }
+      dc.appendChild(c6);
+    }
+
+    setTimeout(function(){
+      if(fVals.length) drawSpider("fund-cv",fVals,[],[],fLbls);
+      if(tr.length) drawSpider("thrive-cv",eV,cV,aV,tLbls);
+    },80);
+  }catch(e){
+    dc.innerHTML="<div class='card'><div style='color:#c0392b;font-size:13px'>Error loading: "+e.message+"</div></div>";
+  }
+}
+
+async function goReport(){
+  showV("r"); var wrap=el("vr"); wrap.innerHTML="";
+  var bb=mkEl("button","btnb"); bb.textContent="← Back to home";
+  bb.addEventListener("click",function(){ showV("h"); renderHome(); });
+  wrap.appendChild(bb);
+  var card=mkEl("div","card");
+  card.appendChild(mkEl("div","ctitle","Generate diagnostic report"));
+  card.appendChild(mkEl("div","csub","Pulls all scores from Airtable and drafts a report in the GoodLifeX / CET style."));
+  var coSel=mk("select"); coSel.id="rco";
+  for(var i=0;i<COS.length;i++){ var o=mk("option");o.value=COS[i].id;o.textContent=COS[i].name;coSel.appendChild(o); }
+  card.appendChild(fg("Company",coSel));
+  var rdSel=mk("select"); rdSel.id="rrd";
+  ["Baseline","Midpoint","Endpoint"].forEach(function(r){ var o=mk("option");o.value=r;o.textContent=r;rdSel.appendChild(o); });
+  card.appendChild(fg("Assessment round",rdSel));
+  var fields=[
+    {id:"rctx", lbl:"Company context",              ph:"Products, markets, founding story...",                          rows:3},
+    {id:"rcirc",lbl:"Circular opportunity identified",ph:"e.g. Build in-house circular fruit processing value chain...",rows:2},
+    {id:"rnarr",lbl:"Arj debrief narrative",         ph:"Paste the debrief call summary here...",                       rows:4}
+  ];
+  for(var i=0;i<fields.length;i++){
+    var ta=mk("textarea"); ta.id=fields[i].id; ta.rows=fields[i].rows; ta.placeholder=fields[i].ph;
+    ta.style.cssText="width:100%;padding:9px 12px;border-radius:8px;border:1px solid #ddd;background:#fafaf8;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;line-height:1.6";
+    card.appendChild(fg(fields[i].lbl,ta));
+  }
+  var sb=mkEl("button","btnp"); sb.id="rep-btn"; sb.textContent="Generate diagnostic report";
+  sb.addEventListener("click",genReport);
+  card.appendChild(sb);
+  wrap.appendChild(card);
+  var ro=mkEl("div",""); ro.id="rep-out"; wrap.appendChild(ro);
+}
+
+async function genReport(){
+  var btn=el("rep-btn");
+  var coId=el("rco").value;
+  var coName=el("rco").options[el("rco").selectedIndex].text;
+  var round=el("rrd").value;
+  var ctx=el("rctx").value;
+  var circ=el("rcirc").value;
+  var narr=el("rnarr").value;
+  btn.disabled=true; btn.innerHTML="<span class='spn'></span>Pulling scores...";
+  var out=el("rep-out"); out.innerHTML="";
+  try{
+    var ad=await atGet(T_ASSESSMENTS+"?maxRecords=100");
+    var matching=[];var recs=ad.records||[];
+    for(var i=0;i<recs.length;i++){
+      var co=recs[i].fields["Company"]||[];
+      if(co.indexOf(coId)>-1 && recs[i].fields[F.rec_type]===round) matching.push(recs[i]);
+    }
+    var scoreText="No scores recorded yet.";
+    if(matching.length){
+      // Fetch all fundamental scores and filter client-side
+      var matchIds=matching.map(function(m){return m.id;});
+      var allFd=await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_FUNDAMENTALS+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
+      var allR=(allFd.records||[]).filter(function(r){
+        var ar=r.fields["Assessment Record"]||[];
+        return ar.some?ar.some(function(id){return matchIds.indexOf(id)>-1;}):matchIds.indexOf(ar)>-1;
+      });
+      if(allR.length){
+        var pm={};
+        for(var i=0;i<allR.length;i++){
+          var pn=allR[i].fields[F.fund_pillar], sc=allR[i].fields[F.fund_score], nt=allR[i].fields[F.fund_commentary];
+          if(!pn) continue;
+          if(!pm[pn]) pm[pn]={s:[],n:[]};
+          if(sc!=null) pm[pn].s.push(sc);
+          if(nt) pm[pn].n.push(nt);
+        }
+        var lines=[]; var keys=Object.keys(pm);
+        for(var i=0;i<keys.length;i++){
+          var d=pm[keys[i]];
+          var notes=d.n.filter(function(x){return x;}).join("; ");
+          lines.push(keys[i]+": "+avg(d.s)+"% | Notes: "+(notes||"none"));
+        }
+        scoreText=lines.join("\n");
+      }
+    }
+    btn.innerHTML="<span class='spn'></span>Writing report with AI...";
+    var prompt="Write a professional diagnostic report for the GoodLifeX / GIZ Investment Readiness Programme.\n\nCompany: "+coName+"\nRound: "+round+"\n\nStructure:\nA. Program Context\nB. Company Snapshot\nC. Initial Observations and Assessment\nD. Circular Opportunity Area Identified\nE. Recommendations for THRIVE Design Lab\nF. Potential Impact of Circular Strategy\nG. Other Possible Areas for Incorporating Circularity\nH. Conclusion\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL SCORES ("+round+"):\n"+scoreText+"\n\nCIRCULAR OPPORTUNITY:\n"+(circ||"To be determined")+"\n\nNARRATIVE:\n"+(narr||"To be added")+"\n\nStyle: Match the CET Diagnostics Report by Arj Wignaraja and GoodLifeX. Warm, specific, professional. Frame low scores as growth opportunities. Include impact table in section F.";
+    // Call Anthropic via corsproxy.io which adds CORS headers
+    var resp=await fetch("https://corsproxy.io/?https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":"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",
+        "anthropic-version":"2023-06-01"
+      },
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:prompt}]})
+    });
+    var data=await resp.json();
+    var text=(data.content||[]).map(function(c){return c.text||"";}).join("")||"Error generating. Please try again.";
+    var c=mkEl("div","card"); c.style.marginTop="14px";
+    var hd=mkEl("div",""); hd.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px";
+    var ht=mkEl("div","ctitle"); ht.textContent=coName+" - "+round+" report";
+    var cpbtn=mkEl("button","");
+    cpbtn.style.cssText="font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid #ddd;background:#fff;cursor:pointer;font-family:inherit";
+    cpbtn.textContent="Copy text";
+    cpbtn.addEventListener("click",function(){ navigator.clipboard.writeText(el("rt").textContent).then(function(){ toast("Copied!"); }); });
+    hd.appendChild(ht); hd.appendChild(cpbtn); c.appendChild(hd);
+    var rb=mkEl("div","rbox"); rb.id="rt"; rb.textContent=text; c.appendChild(rb);
+    var nt=mkEl("div",""); nt.style.cssText="font-size:11px;color:#aaa;margin-top:10px";
+    nt.textContent="AI first draft. Review, edit and finalise in Canva or Word."; c.appendChild(nt);
+    out.appendChild(c);
+  }catch(e){
+    out.innerHTML="<div style='color:#c0392b;font-size:13px;padding:12px'>Error: "+e.message+"</div>";
+  }
+  btn.disabled=false; btn.textContent="Generate diagnostic report";
+}
+
+init();
+
+</script>
+</body>
+</html>
