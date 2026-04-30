@@ -159,9 +159,8 @@ let ALL_ASSESSMENTS=[];
 
 async function init(){
   try{
-    const formula=encodeURIComponent(`FIND("${CO_ID}",ARRAYJOIN({Company}))`);
-    const d=await atGet(`Assessment%20Records?filterByFormula=${formula}&maxRecords=50`);
-    ALL_ASSESSMENTS=d.records||[];
+    const d=await atGet(`Assesment%20Records?maxRecords=100`);
+    ALL_ASSESSMENTS=(d.records||[]).filter(r=>(r.fields["Company"]||[]).includes(CO_ID));
     document.getElementById("cd").style.background="#1D9E75";
     document.getElementById("ct").textContent="Live";
     await renderRound("Baseline");
@@ -196,13 +195,12 @@ async function renderRound(round){
     return;
   }
   let fundRecs=[],thriveRecs=[];
-  for(const a of matching){
-    const f2=encodeURIComponent(`FIND("${a.id}",ARRAYJOIN({Assessment Record}))`);
-    const fd=await atGet(`Fundamental%20Scores?filterByFormula=${f2}&maxRecords=200`);
-    fundRecs.push(...(fd.records||[]));
-    const td=await atGet(`THRIVE%20Scores?filterByFormula=${f2}&maxRecords=100`);
-    thriveRecs.push(...(td.records||[]));
-  }
+  const matchIds=matching.map(a=>a.id);
+  function filterAR(recs){return(recs||[]).filter(r=>{const ar=r.fields["Assessment Record"]||[];return Array.isArray(ar)?ar.some(id=>matchIds.includes(id)):matchIds.includes(ar);});}
+  const allF=await atGet(`Fundamental%20Scores?maxRecords=200`);
+  fundRecs=filterAR(allF.records);
+  const allT=await atGet(`THRIVE%20Scores?maxRecords=200`);
+  thriveRecs=filterAR(allT.records);
   const pm={};
   fundRecs.forEach(r=>{const pn=r.fields["Pillar Name"];if(!pn)return;if(!pm[pn])pm[pn]=[];if(r.fields["Score (0-100)"]!=null)pm[pn].push(r.fields["Score (0-100)"]);  });
   const expertT={},companyT={},allT={};
@@ -223,7 +221,7 @@ async function renderRound(round){
     const rdM=ALL_ASSESSMENTS.filter(r=>r.fields["Assessment Type"]===rd);
     if(rdM.length){
       let rr=[];
-      for(const a of rdM){const f3=encodeURIComponent(`FIND("${a.id}",ARRAYJOIN({Assessment Record}))`);const rd2=await atGet(`Fundamental%20Scores?filterByFormula=${f3}&maxRecords=200`);rr.push(...(rd2.records||[]));};
+      const rdIds2=rdM.map(a=>a.id);const allF3=await atGet(`Fundamental%20Scores?maxRecords=200`);rr=(allF3.records||[]).filter(r=>{const ar=r.fields["Assessment Record"]||[];return Array.isArray(ar)?ar.some(id=>rdIds2.includes(id)):rdIds2.includes(ar);});;
       const sc=rr.map(r=>r.fields["Score (0-100)"]).filter(v=>v!=null);
       if(sc.length)progressData[rd]=avg(sc);
     }
