@@ -1073,6 +1073,10 @@ async function goReport(){
   var rdSel=mk("select"); rdSel.id="rrd";
   ["Baseline","Midpoint","Endpoint"].forEach(function(r){ var o=mk("option");o.value=r;o.textContent=r;rdSel.appendChild(o); });
   card.appendChild(fg("Assessment round",rdSel));
+  var rtSel=mk("select"); rtSel.id="rrtype";
+  var o1=mk("option");o1.value="diagnostic";o1.textContent="Diagnostic report (Arj — fundamentals, gaps, capacity)";rtSel.appendChild(o1);
+  var o2=mk("option");o2.value="scpirc";o2.textContent="SCP / IRC report (CCOs — EU Output 2.2 and investment readiness)";rtSel.appendChild(o2);
+  card.appendChild(fg("Report type",rtSel));
   var fields=[
     {id:"rctx", lbl:"Company context",              ph:"Products, markets, founding story...",                          rows:3},
     {id:"rcirc",lbl:"Circular opportunity identified",ph:"e.g. Build in-house circular fruit processing value chain...",rows:2},
@@ -1095,47 +1099,153 @@ async function genReport(){
   var coId=el("rco").value;
   var coName=el("rco").options[el("rco").selectedIndex].text;
   var round=el("rrd").value;
+  var repType=el("rrtype")?el("rrtype").value:"diagnostic";
   var ctx=el("rctx").value;
   var circ=el("rcirc").value;
   var narr=el("rnarr").value;
-  btn.disabled=true; btn.innerHTML="<span class='spn'></span>Pulling scores...";
+  btn.disabled=true; btn.innerHTML="<span class='spn'></span>Pulling data from Airtable...";
   var out=el("rep-out"); out.innerHTML="";
   try{
     var ad=await atGet(T_ASSESSMENTS+"?maxRecords=100");
-    var matching=[];var recs=ad.records||[];
-    for(var i=0;i<recs.length;i++){
-      var co=recs[i].fields["Company"]||[];
-      if(co.indexOf(coId)>-1 && recs[i].fields[F.rec_type]===round) matching.push(recs[i]);
-    }
-    var scoreText="No scores recorded yet.";
-    if(matching.length){
-      // Fetch all fundamental scores and filter client-side
-      var matchIds=matching.map(function(m){return m.id;});
-      var allFd=await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_FUNDAMENTALS+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
-      var allR=(allFd.records||[]).filter(function(r){
+    var allRecs=ad.records||[];
+    var matching=allRecs.filter(function(r){
+      var co=r.fields["Company"]||[];
+      return co.indexOf(coId)>-1 && r.fields[F.rec_type]===round;
+    });
+    var matchIds=matching.map(function(m){return m.id;});
+
+    function filterAR(recs){
+      return(recs||[]).filter(function(r){
         var ar=r.fields["Assessment Record"]||[];
         return ar.some?ar.some(function(id){return matchIds.indexOf(id)>-1;}):matchIds.indexOf(ar)>-1;
       });
-      if(allR.length){
-        var pm={};
-        for(var i=0;i<allR.length;i++){
-          var pn=allR[i].fields[F.fund_pillar], sc=allR[i].fields[F.fund_score], nt=allR[i].fields[F.fund_commentary];
-          if(!pn) continue;
-          if(!pm[pn]) pm[pn]={s:[],n:[]};
-          if(sc!=null) pm[pn].s.push(sc);
-          if(nt) pm[pn].n.push(nt);
-        }
-        var lines=[]; var keys=Object.keys(pm);
-        for(var i=0;i<keys.length;i++){
-          var d=pm[keys[i]];
-          var notes=d.n.filter(function(x){return x;}).join("; ");
-          lines.push(keys[i]+": "+avg(d.s)+"% | Notes: "+(notes||"none"));
-        }
-        scoreText=lines.join("\n");
-      }
     }
-    btn.innerHTML="<span class='spn'></span>Writing report with AI...";
-    var prompt="Write a professional diagnostic report for the GoodLifeX / GIZ SME Programme.\n\nCompany: "+coName+"\nRound: "+round+"\n\nStructure:\nA. Program Context\nB. Company Snapshot\nC. Initial Observations and Assessment\nD. Circular Opportunity Area Identified\nE. Recommendations for THRIVE Design Lab\nF. Potential Impact of Circular Strategy\nG. Other Possible Areas for Incorporating Circularity\nH. Conclusion\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL SCORES ("+round+"):\n"+scoreText+"\n\nCIRCULAR OPPORTUNITY:\n"+(circ||"To be determined")+"\n\nNARRATIVE:\n"+(narr||"To be added")+"\n\nStyle: Match the CET Diagnostics Report by Arj Wignaraja and GoodLifeX. Warm, specific, professional. Frame low scores as growth opportunities. Include impact table in section F.";
+
+    // Fetch all data tables in parallel
+    btn.innerHTML="<span class='spn'></span>Fetching scores...";
+    var fundAll  = await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_FUNDAMENTALS+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
+    var conAll   = await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_CONSENSUS+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
+    var capAll   = await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_CAPACITY+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
+    var ircAll   = await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_IRC+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
+    var scpAll   = await fetch("https://api.airtable.com/v0/"+BASE+"/"+T_SCP+"?maxRecords=200",{headers:{"Authorization":"Bearer "+KEY}}).then(function(r){return r.json();});
+
+    var fundRecs = filterAR(fundAll.records);
+    var conRecs  = filterAR(conAll.records);
+    var capRecs  = filterAR(capAll.records);
+    var ircRecs  = filterAR(ircAll.records);
+    var scpRecs  = filterAR(scpAll.records);
+
+    btn.innerHTML="<span class='spn'></span>Building report...";
+
+    // FUNDAMENTALS — per pillar with all observations, gaps, confidence
+    var pm={};
+    for(var i=0;i<fundRecs.length;i++){
+      var rf=fundRecs[i].fields;
+      var pn=rf["Pillar Name"]; if(!pn) continue;
+      if(!pm[pn]) pm[pn]={scores:[],potential:[],notes:[],gaps:[],conf:[]};
+      if(rf[F.fund_score]!=null)     pm[pn].scores.push(rf[F.fund_score]);
+      if(rf[F.fund_potential]!=null) pm[pn].potential.push(rf[F.fund_potential]);
+      if(rf[F.fund_commentary])      pm[pn].notes.push(rf[F.fund_commentary]);
+      if(rf["Key Gaps"])             pm[pn].gaps.push(rf["Key Gaps"]);
+      if(rf[F.fund_confidence])      pm[pn].conf.push(rf[F.fund_confidence]);
+    }
+    var fundText="No fundamental scores recorded.";
+    if(Object.keys(pm).length){
+      var lines=[];
+      for(var i=0;i<PILLARS.length;i++){
+        var p=PILLARS[i]; if(!pm[p]) continue;
+        var d=pm[p];
+        var sc=avg(d.scores); var pot=d.potential.length?avg(d.potential):0;
+        var obs=d.notes.filter(Boolean).join(" | ")||"None entered";
+        var gaps=d.gaps.filter(Boolean).join(" | ")||"None specified";
+        var conf=d.conf.length?d.conf[0]:"Medium";
+        lines.push(p+" — Score: "+sc+"% | Potential: "+pot+"% | Confidence: "+conf+
+          "\n  Observations: "+obs+
+          "\n  Key Gaps: "+gaps);
+      }
+      fundText=lines.join("\n\n");
+    }
+
+    // CONSENSUS — agreed scores and commentary
+    var consText="No consensus scores recorded yet.";
+    if(conRecs.length){
+      var cl=[];
+      for(var i=0;i<conRecs.length;i++){
+        var rc=conRecs[i].fields;
+        var pn=rc["Pillar Name"]; if(!pn) continue;
+        cl.push(pn+": "+rc[F.con_score]+"% — "+(rc[F.con_comment]||"")+(rc[F.con_variance]?" [Variance note: "+rc[F.con_variance]+"]":""));
+      }
+      consText=cl.join("\n");
+    }
+
+    // CAPACITY NEEDS — by priority
+    var capText="No capacity needs logged.";
+    if(capRecs.length){
+      var high=capRecs.filter(function(r){return r.fields["Priority"]==="High";});
+      var med =capRecs.filter(function(r){return r.fields["Priority"]==="Medium";});
+      var low =capRecs.filter(function(r){return r.fields["Priority"]==="Low";});
+      var cl=[];
+      if(high.length) cl.push("HIGH: "+high.map(function(r){return "["+r.fields["Need Category"]+"] "+r.fields["Description"]+" ("+r.fields["Source"]+")";}).join(" | "));
+      if(med.length)  cl.push("MEDIUM: "+med.map(function(r){return "["+r.fields["Need Category"]+"] "+r.fields["Description"]+" ("+r.fields["Source"]+")";}).join(" | "));
+      if(low.length)  cl.push("LOW: "+low.map(function(r){return "["+r.fields["Need Category"]+"] "+r.fields["Description"]+" ("+r.fields["Source"]+")";}).join(" | "));
+      capText=cl.join("\n");
+    }
+
+    // IRC SCORES
+    var ircText="No IRC scores recorded.";
+    if(ircRecs.length){
+      var im={};
+      for(var i=0;i<ircRecs.length;i++){
+        var ri=ircRecs[i].fields;
+        var sec=ri["Section"]; if(!sec) continue;
+        if(!im[sec]) im[sec]={scores:[],feedback:[]};
+        if(ri[F.irc_raw]!=null)   im[sec].scores.push(ri[F.irc_raw]);
+        if(ri[F.irc_feedback])    im[sec].feedback.push(ri[F.irc_feedback]);
+      }
+      var il=[];
+      var secs=Object.keys(im);
+      for(var i=0;i<secs.length;i++){
+        var d=im[secs[i]];
+        var sc=avg(d.scores); var norm=Math.round((sc/40)*10);
+        il.push(secs[i]+": "+sc+"/40 ("+norm+"/10) — "+(d.feedback.filter(Boolean).join(" | ")||"No feedback"));
+      }
+      ircText=il.join("\n");
+    }
+
+    // SCP INDICATORS
+    var scpText="No SCP indicators recorded.";
+    if(scpRecs.length){
+      var sm={};
+      for(var i=0;i<scpRecs.length;i++){
+        var rs=scpRecs[i].fields;
+        var tn=rs["Theme Name"]; if(!tn) continue;
+        if(!sm[tn]) sm[tn]={scores:[],notes:[]};
+        if(rs[F.scp_score]!=null) sm[tn].scores.push(rs[F.scp_score]);
+        if(rs[F.scp_notes])       sm[tn].notes.push(rs[F.scp_notes]);
+      }
+      var sl=[];
+      var themes=Object.keys(sm);
+      for(var i=0;i<themes.length;i++){
+        var d=sm[themes[i]];
+        sl.push(themes[i]+": "+avg(d.scores)+"/5 — "+(d.notes.filter(Boolean).join(" | ")||"No evidence"));
+      }
+      scpText=sl.join("\n");
+    }
+
+    btn.innerHTML="<span class='spn'></span>Generating report with AI...";
+
+    // Build prompt based on report type and round
+    var prompt;
+    if(repType==="scpirc"){
+      prompt="Write a professional SCP and Investment Readiness assessment report for the GIZ SME Programme by Good Life X.\n\nCompany: "+coName+"\nRound: "+round+"\n\nUse EXACTLY these sections:\nA. Program Context\nB. GIZ Investment Readiness Assessment\nC. EU Output 2.2 — SCP Indicator Assessment\nD. Key Findings and Observations\nE. Recommendations\nF. Conclusion\n\nDo NOT include fundamentals diagnostic sections — this report focuses only on IRC and SCP.\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nIRC / GIZ SCORES:\n"+ircText+"\n\nSCP INDICATORS (EU Output 2.2):\n"+scpText+"\n\nASSESSOR NARRATIVE:\n"+(narr||"")+"\n\nStyle: Professional, structured, suitable for GIZ donor reporting. Specific about evidence. Include a summary table of SCP scores.";
+    } else if(round==="Baseline"){
+      prompt="Write a professional baseline diagnostic report for the GIZ SME Programme by Good Life X.\n\nCompany: "+coName+"\nRound: Baseline\n\nUse EXACTLY these sections:\nA. Program Context\nB. Company Snapshot\nC. Initial Observations and Assessment (cover all 10 pillars with narrative — group into logical sub-sections)\nD. Key Gaps and Priority Areas\nE. Capacity Building Needs Identified\nF. Investment Readiness Assessment\nG. Recommended Focus Areas for the Programme\nH. Conclusion\n\nDo NOT include THRIVE canvas, circular strategy or Design Lab sections — these are assessed at Midpoint only.\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL PILLAR SCORES AND OBSERVATIONS:\n"+fundText+"\n\nCONSENSUS SCORES (post-debrief):\n"+consText+"\n\nCAPACITY BUILDING NEEDS:\n"+capText+"\n\nASSESSOR DEBRIEF NARRATIVE:\n"+(narr||"To be added")+"\n\nStyle: Match CET Diagnostics Report style by Arj Wignaraja and Good Life X. Warm, specific, professional. Frame low scores as development opportunities. Be concrete — use actual observations and gaps from the data above, not generic statements.";
+    } else if(round==="Midpoint"){
+      prompt="Write a professional midpoint assessment report for the GIZ SME Programme by Good Life X.\n\nCompany: "+coName+"\nRound: Midpoint\n\nUse EXACTLY these sections:\nA. Program Context and Progress to Date\nB. Company Snapshot (updated)\nC. Fundamentals Progress — Baseline vs Midpoint\nD. Circular Opportunity Area — Deep Dive\nE. THRIVE Canvas Assessment\nF. Recommendations for THRIVE Design Lab\nG. Potential Impact of Circular Strategy (include impact table)\nH. Capacity Building — Progress and Remaining Needs\nI. Conclusion and Next Steps\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL SCORES AND OBSERVATIONS:\n"+fundText+"\n\nCONSENSUS SCORES:\n"+consText+"\n\nCIRCULAR OPPORTUNITY:\n"+(circ||"To be determined")+"\n\nCAPACITY BUILDING NEEDS:\n"+capText+"\n\nASSESSOR NARRATIVE:\n"+(narr||"")+"\n\nStyle: Match CET Diagnostics Report style. Show progress since baseline. Include impact metrics table. Warm, specific, professional.";
+    } else {
+      prompt="Write a professional endpoint evaluation report for the GIZ SME Programme by Good Life X.\n\nCompany: "+coName+"\nRound: Endpoint\n\nUse EXACTLY these sections:\nA. Program Context and Overview\nB. Company Snapshot — Then and Now\nC. Fundamentals Transformation — Baseline to Endpoint\nD. THRIVE and Circularity — What Changed\nE. SCP Indicator Outcomes\nF. Capacity Building — What Was Delivered and Impact\nG. Investment Readiness — Progress and Current Status\nH. Key Learnings and Recommendations\nI. Conclusion\n\nCOMPANY CONTEXT:\n"+(ctx||"Not provided")+"\n\nFUNDAMENTAL SCORES AND OBSERVATIONS:\n"+fundText+"\n\nCONSENSUS SCORES:\n"+consText+"\n\nSCP INDICATORS:\n"+scpText+"\n\nCAPACITY BUILDING:\n"+capText+"\n\nASSESSOR NARRATIVE:\n"+(narr||"")+"\n\nStyle: Final report — celebrate progress, specific about outcomes, frame recommendations for the company's next chapter beyond the programme.";
+    }
+
     var resp=await fetch("https://melreportgen.thushan-6bf.workers.dev/",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
@@ -1143,9 +1253,10 @@ async function genReport(){
     });
     var data=await resp.json();
     var text=data.text||"Error generating. Please try again.";
+
     var c=mkEl("div","card"); c.style.marginTop="14px";
     var hd=mkEl("div",""); hd.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px";
-    var ht=mkEl("div","ctitle"); ht.textContent=coName+" - "+round+" report";
+    var ht=mkEl("div","ctitle"); ht.textContent=coName+" - "+round+" "+(repType==="scpirc"?"SCP/IRC":"Diagnostic")+" report";
     var cpbtn=mkEl("button","");
     cpbtn.style.cssText="font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid #ddd;background:#fff;cursor:pointer;font-family:inherit";
     cpbtn.textContent="Copy text";
@@ -1158,8 +1269,9 @@ async function genReport(){
   }catch(e){
     out.innerHTML="<div style='color:#c0392b;font-size:13px;padding:12px'>Error: "+e.message+"</div>";
   }
-  btn.disabled=false; btn.textContent="Generate diagnostic report";
+  btn.disabled=false; btn.textContent="Generate report";
 }
+
 
 init();
 
