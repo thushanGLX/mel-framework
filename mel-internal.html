@@ -230,9 +230,10 @@ var SCP_THEMES = [
 ];
 
 var ROLES = [
-  {id:"arj", label:"Arj Wignaraja",    color:"#0F6E56", bg:"#e0f5ec"},
-  {id:"cco", label:"CCO",              color:"#185FA5", bg:"#e6f1fb"},
-  {id:"pd",  label:"Program Director", color:"#854F0B", bg:"#fef3e2"}
+  {id:"arj", label:"Arj Wignaraja",     color:"#0F6E56", bg:"#e0f5ec"},
+  {id:"cco", label:"CCO",               color:"#185FA5", bg:"#e6f1fb"},
+  {id:"pd",  label:"Program Director",  color:"#854F0B", bg:"#fef3e2"},
+  {id:"pm",  label:"Program Manager",   color:"#6B3FA0", bg:"#f0e8fb"}
 ];
 
 var S = {
@@ -359,15 +360,42 @@ function renderHome(){
   }
   wrap.appendChild(mkEl("div","sec-lbl","What do you want to do?"));
   var agrid=mkEl("div","agrid");
-  var actions=[
-    {ico:"📊",title:"Enter fundamentals scores",desc:"After the diagnostic call",pri:true,  fn:function(){startScore("Fundamentals");}},
-    {ico:"🌱",title:"Enter THRIVE scores",       desc:"After the masterclass",   pri:false, fn:function(){startScore("THRIVE");}},
-    {ico:"📋",title:"Enter IRC scores",          desc:"GIZ evaluation — Arj only",pri:false,fn:function(){startScore("IRC");}},
-    {ico:"🤝",title:"Enter consensus scores",desc:"Viranja — after the debrief call",pri:false,fn:function(){startScore("Consensus");}},
-    {ico:"🎯",title:"Log capacity needs",        desc:"Support needs identified", pri:false, fn:function(){startScore("Capacity");}},
-    {ico:"🌿",title:"Enter SCP indicators",desc:"SUP, food loss, gender equity etc — every round",pri:false,fn:function(){startScore("SCP");}},
-    {ico:"📈",title:"View dashboard",            desc:"Scores and spider charts",  pri:false, fn:function(){goDash();}},
-  ];
+  var actions=[];
+
+  // Fundamentals — Arj, CCO, Program Director
+  if(S.role==="arj"||S.role==="cco"||S.role==="pd"){
+    actions.push({ico:"📊",title:"Enter fundamentals scores",desc:"After the diagnostic call",pri:true,fn:function(){startScore("Fundamentals");}});
+  }
+
+  // THRIVE — Arj, CCO, Program Director
+  if(S.role==="arj"||S.role==="cco"||S.role==="pd"){
+    actions.push({ico:"🌱",title:"Enter THRIVE scores",desc:"After the masterclass",pri:false,fn:function(){startScore("THRIVE");}});
+  }
+
+  // IRC — CCO only
+  if(S.role==="cco"){
+    actions.push({ico:"📋",title:"Enter IRC scores",desc:"GIZ evaluation sections",pri:false,fn:function(){startScore("IRC");}});
+  }
+
+  // SCP — CCO only
+  if(S.role==="cco"){
+    actions.push({ico:"🌿",title:"Enter SCP indicators",desc:"EU Output 2.2 — every round",pri:false,fn:function(){startScore("SCP");}});
+  }
+
+  // Capacity — Arj only
+  if(S.role==="arj"){
+    actions.push({ico:"🎯",title:"Log capacity needs",desc:"Support needs identified",pri:false,fn:function(){startScore("Capacity");}});
+  }
+
+  // Consensus — Program Manager only
+  if(S.role==="pm"){
+    actions.push({ico:"🤝",title:"Enter consensus scores",desc:"After the debrief call",pri:true,fn:function(){startScore("Consensus");}});
+  }
+
+  // Dashboard — everyone
+  actions.push({ico:"📈",title:"View dashboard",desc:"Scores and spider charts",pri:false,fn:function(){goDash();}});
+
+  // Generate report — Arj and Program Director only
   if(S.role==="arj"||S.role==="pd"){
     actions.push({ico:"📄",title:"Generate report",desc:"AI-drafted in CET style",pri:false,fn:function(){goReport();}});
   }
@@ -391,7 +419,8 @@ function renderHome(){
 }
 
 function setRole(id,label){
-  S.role=id; S.name=(id==="cco"?"":label);
+  S.role=id; 
+  S.name=(id==="cco"||id==="pm")?"":label;
   renderHome();
 }
 
@@ -738,6 +767,7 @@ async function doSubmit(){
       for(var i=0;i<SCP_THEMES.length;i++){
         var f={};
         f[F.scp_record] = [aId];
+        f["Assessor Name"] = S.name;
         f[F.scp_theme]  = SCP_THEMES[i];
         f[F.scp_score]  = S.scp[i];
         f[F.scp_notes]  = S.scpNotes[i]||"";
@@ -755,9 +785,9 @@ async function doSubmit(){
         if(!n.desc.trim()) continue;
         var f={};
         f[F.cap_record]   = [aId];
+        f["Assessor Name"] = S.name;
         f[F.cap_category] = n.cat;
         f[F.cap_desc]     = n.desc;
-        // Priority and Source added only if field options confirmed in Airtable
         if(n.pri) f[F.cap_priority] = n.pri;
         if(n.src) f[F.cap_source]   = n.src;
         recs.push({fields:f});
