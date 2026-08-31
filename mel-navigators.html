@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navigator Portfolios · GIZ SME Programme</title>
+<style>
+  :root{
+    --forest:#0D5C45; --sage:#3D8B70; --mist:#E8F5EE;
+    --ink:#1A1917; --stone:#F5F3EE; --cloud:#FAFAF7;
+    --slate:#6B6B64; --rule:#DFDDD6; --white:#fff;
+    --green:#1D9E75; --ltgreen:#DFF3EB;
+    --amber:#B07A1A; --ltamber:#FEF3E2;
+    --red:#C94F3E;   --ltred:#FDECEA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:var(--cloud); color:var(--ink); line-height:1.55; font-size:15px;
+  }
+  .topbar{background:var(--forest); color:#fff; padding:14px 28px; display:flex;
+    align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px}
+  .topbar h1{font-size:17px; font-weight:600; letter-spacing:.02em}
+  .topbar .sub{font-size:13px; opacity:.75}
+  .wrap{max-width:1400px; margin:0 auto; padding:28px}
+
+  /* Navigator tabs */
+  .navtabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px}
+  .navtab{
+    background:#fff; border:1.5px solid var(--rule); border-radius:8px;
+    padding:14px 20px; cursor:pointer; transition:.15s; min-width:200px; text-align:left;
+    font-family:inherit; font-size:inherit; color:inherit;
+  }
+  .navtab:hover{border-color:var(--sage); transform:translateY(-1px)}
+  .navtab.active{background:var(--forest); border-color:var(--forest); color:#fff}
+  .navtab .nm{font-weight:650; font-size:15px; display:block}
+  .navtab .ct{font-size:12.5px; opacity:.72; margin-top:2px; display:block}
+
+  /* Cards */
+  .card{background:#fff; border:1px solid var(--rule); border-radius:10px;
+    padding:22px 24px; margin-bottom:20px}
+  .card h2{font-size:18px; font-weight:650; margin-bottom:4px; color:var(--ink)}
+  .card .lede{font-size:13.5px; color:var(--slate); margin-bottom:16px}
+
+  /* Score blocks */
+  .scorerow{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px; margin-bottom:18px}
+  .scoreblock{border:1.5px solid var(--rule); border-radius:9px; padding:16px 18px; background:var(--stone)}
+  .scoreblock .lbl{font-size:11px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--slate); margin-bottom:4px}
+  .scoreblock .val{font-size:38px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+  .scoreblock .note{font-size:12px; color:var(--slate); margin-top:5px}
+  .scoreblock.good{background:var(--ltgreen); border-color:var(--green)}
+  .scoreblock.good .val{color:var(--green)}
+  .scoreblock.mid{background:var(--ltamber); border-color:var(--amber)}
+  .scoreblock.mid .val{color:var(--amber)}
+  .scoreblock.low{background:var(--ltred); border-color:var(--red)}
+  .scoreblock.low .val{color:var(--red)}
+  .scoreblock.none .val{color:var(--slate); font-size:22px}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; font-size:13.5px}
+  th{background:var(--forest); color:#fff; text-align:left; padding:10px 12px;
+    font-weight:600; font-size:12.5px; letter-spacing:.02em}
+  th.c{text-align:center}
+  td{padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top}
+  td.c{text-align:center}
+  tr:nth-child(even) td{background:var(--cloud)}
+  tr:hover td{background:var(--mist)}
+  .pill{display:inline-block; padding:3px 9px; border-radius:20px;
+    font-weight:700; font-size:13px; font-variant-numeric:tabular-nums}
+  .pill.good{background:var(--ltgreen); color:var(--green)}
+  .pill.mid{background:var(--ltamber); color:var(--amber)}
+  .pill.low{background:var(--ltred); color:var(--red)}
+  .pill.none{background:var(--stone); color:var(--slate); font-weight:500; font-size:12px}
+
+  /* Bar */
+  .bar{height:7px; background:var(--stone); border-radius:4px; overflow:hidden; min-width:80px}
+  .bar i{display:block; height:100%; border-radius:4px}
+
+  /* Company accordion */
+  .co{border:1px solid var(--rule); border-radius:10px; margin-bottom:12px;
+    background:#fff; overflow:hidden}
+  .cohead{padding:16px 20px; cursor:pointer; display:flex; align-items:center;
+    gap:16px; flex-wrap:wrap; transition:.15s}
+  .cohead:hover{background:var(--mist)}
+  .cohead .nm{font-weight:650; font-size:16px; flex:1; min-width:180px}
+  .cohead .sec{font-size:12.5px; color:var(--slate); flex-basis:100%; margin-top:-4px}
+  .cohead .chev{color:var(--slate); font-size:13px; transition:.2s}
+  .co.open .chev{transform:rotate(90deg)}
+  .cobody{display:none; padding:0 20px 20px; border-top:1px solid var(--rule)}
+  .co.open .cobody{display:block}
+
+  .sec-h{font-size:14px; font-weight:650; color:var(--forest);
+    margin:20px 0 8px; padding-bottom:5px; border-bottom:1.5px solid var(--mist)}
+
+  .gap{background:var(--ltamber); border-left:4px solid var(--amber);
+    padding:10px 14px; border-radius:0 6px 6px 0; font-size:13px; margin:10px 0}
+  .empty{background:var(--stone); border-left:4px solid var(--slate);
+    padding:10px 14px; border-radius:0 6px 6px 0; font-size:13px;
+    color:var(--slate); font-style:italic; margin:10px 0}
+
+  .capgrp{margin-bottom:14px}
+  .capgrp h4{font-size:13px; font-weight:700; margin-bottom:6px}
+  .capgrp.High h4{color:var(--red)}
+  .capgrp.Medium h4{color:var(--amber)}
+  .capgrp.Low h4{color:var(--green)}
+
+  .note{font-size:13px; color:var(--slate); padding:6px 0}
+  .note b{color:var(--sage)}
+
+  .obs li{margin-bottom:6px; font-size:14px}
+  .obs{padding-left:20px}
+
+  .loading{text-align:center; padding:60px; color:var(--slate)}
+  .err{background:var(--ltred); border-left:4px solid var(--red);
+    padding:14px 18px; border-radius:0 6px 6px 0; margin:20px 0}
+
+  .actions{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px}
+  .btn{background:#fff; border:1.5px solid var(--rule); border-radius:7px;
+    padding:8px 16px; font-size:13.5px; cursor:pointer; font-family:inherit;
+    color:var(--ink); transition:.15s}
+  .btn:hover{border-color:var(--sage); background:var(--mist)}
+
+  @media print{
+    .topbar,.navtabs,.actions,.btn{display:none}
+    .cobody{display:block !important}
+    .card{break-inside:avoid; border:1px solid #ccc}
+    body{background:#fff}
+  }
+  @media(max-width:700px){
+    .wrap{padding:16px}
+    .navtab{min-width:100%}
+    table{font-size:12.5px}
+    td,th{padding:7px 8px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Navigator Portfolios</h1>
+    <div class="sub">GIZ SME Programme · Good Life X · Baseline 2026</div>
+  </div>
+  <div class="sub" id="stamp"></div>
+</div>
+
+<div class="wrap">
+  <div class="navtabs" id="tabs"></div>
+  <div class="actions">
+    <button class="btn" onclick="expandAll(true)">Expand all</button>
+    <button class="btn" onclick="expandAll(false)">Collapse all</button>
+    <button class="btn" onclick="window.print()">Print / PDF</button>
+    <button class="btn" onclick="exportCSV()">Export CSV</button>
+  </div>
+  <div id="content"><div class="loading">Loading portfolio data…</div></div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const AIRTABLE_BASE  = 'appPFQWqbIP5Twi4r';
+// NOTE: replace with a READ-ONLY token before deploying
+const AIRTABLE_TOKEN = 'pat1Oa1Z0A4zWYneN.1f721a20a51c8f40fca4dd8622a43689002615d2b051d50ffbd09dfdc8348b2d';
+
+const NAVIGATORS = [
+  { name:'Hasanthie Jayasinghe', companies:['recKl0Qp40ZoViPpJ','recockH7360fqeHSH','recmkMq6L0CQ8prZb'] },
+  { name:'Chamudi Herath',       companies:['recaNl4i18QR4iboK','recgh9N7BJU5LO737','recfDu1dqz6X51OJK'] },
+  { name:'Nirmalie Appuhamy',    companies:['recV0Oak0Ru40FCtF','recyaHP0oaJAU9tkh'] },
+];
+
+const CO_NAMES = {
+  'recKl0Qp40ZoViPpJ':'Jaffna Horticulture',
+  'recfDu1dqz6X51OJK':'A R Natural Export',
+  'recmkMq6L0CQ8prZb':'Seashore Gardens',
+  'recV0Oak0Ru40FCtF':'AiGrow',
+  'recaNl4i18QR4iboK':'Saara Labs',
+  'recyaHP0oaJAU9tkh':'E-Silk Route Ventures',
+  'recgh9N7BJU5LO737':'Navigata Foods',
+  'recockH7360fqeHSH':'CleanTech',
+};
+const SECTORS = {
+  'Jaffna Horticulture':'Agri-processing / Horticulture',
+  'CleanTech':'Plastics Recycling / Circular Economy',
+  'Seashore Gardens':'Seaweed / Health & Wellness',
+  'Saara Labs':'Functional Food / Nutraceuticals',
+  'Navigata Foods':'Organic Agri-processing / Dehydrated Fruits',
+  'A R Natural Export':'Agri-processing / Kithul Products',
+  'AiGrow':'AgriTech / Controlled Environment Agriculture',
+  'E-Silk Route Ventures':'Nutraceuticals / AI-enabled Manufacturing',
+};
+
+const PILLARS = ['Leadership Capacity','Management Capacity','Ops Team / Staff','Supply Chain','Demand',
+  'Systems & Processes','Innovation','Financial Firepower','Product / Brand Equity','Governance & Culture'];
+const IRC_SECTIONS = ['Team Development','Data Room & Due Diligence','Data Analytics','Market & Competition',
+  'Product Maturity','Marketing & Sales','Customer Growth','Traction & Investment'];
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+const band = v => v==null ? 'none' : v>=70 ? 'good' : v>=50 ? 'mid' : 'low';
+const bandColor = v => v==null ? 'var(--slate)' : v>=70 ? 'var(--green)' : v>=50 ? 'var(--amber)' : 'var(--red)';
+const avg = a => { const v=a.filter(x=>x!=null&&x!==''); return v.length? Math.round(v.reduce((x,y)=>x+ +y,0)/v.length) : null; };
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function fetchTable(name){
+  let all=[], offset=null;
+  do{
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(name)}?pageSize=100`
+      + (offset?`&offset=${offset}`:'');
+    const r = await fetch(url,{headers:{Authorization:'Bearer '+AIRTABLE_TOKEN}});
+    if(!r.ok) throw new Error(`${name}: ${r.status} ${r.statusText}`);
+    const j = await r.json();
+    all = all.concat(j.records.map(x=>({id:x.id, ...x.fields})));
+    offset = j.offset;
+  } while(offset);
+  return all;
+}
+
+// ── LOAD & SHAPE ────────────────────────────────────────────────────────────
+let DATA = {};
+
+async function load(){
+  try{
+    const [records, fund, irc, cap] = await Promise.all([
+      fetchTable('Assesment Records'),
+      fetchTable('Fundamental Scores'),
+      fetchTable('IRC / GIZ Scores'),
+      fetchTable('Capacity Building'),
+    ]);
+
+    // map assessment record -> company
+    const ar2co = {};
+    records.forEach(r=>{
+      const c = r['Company'];
+      if(Array.isArray(c)&&c.length) ar2co[r.id]=c[0];
+    });
+
+    Object.keys(CO_NAMES).forEach(cid=>{
+      const ars = Object.keys(ar2co).filter(k=>ar2co[k]===cid);
+
+      // pillars — dedupe to latest per assessor per pillar
+      const pmap = {};
+      fund.forEach(f=>{
+        const ar=f['Assessment Record'];
+        if(!Array.isArray(ar)||!ars.includes(ar[0])) return;
+        const pn=(f['Pillar Name']||'').trim(); if(!pn) return;
+        const who=f['Assessor Name']||'Unknown';
+        pmap[pn] = pmap[pn] || {};
+        const prev = pmap[pn][who];
+        const ts = f['Entry Timestamp']||'';
+        if(!prev || ts > (prev.ts||'')) pmap[pn][who] = {
+          score:f['Score (0–100)'], pot:f['Scale-up Potential (0–100)'],
+          conf:f['Confidence Level'], note:f['Commentary'], ts
+        };
+      });
+
+      const pillars = {};
+      PILLARS.forEach(pn=>{
+        const entries = Object.entries(pmap[pn]||{});
+        pillars[pn] = {
+          score: avg(entries.map(([,d])=>d.score)),
+          pot:   avg(entries.map(([,d])=>d.pot)),
+          assessors: entries.map(([w])=>w),
+          notes: entries.filter(([,d])=>d.note).map(([w,d])=>[w,d.note]),
+        };
+      });
+
+      // IRC — latest per assessor per section
+      const imap = {};
+      irc.forEach(r=>{
+        const ar=r['Assessment Record'];
+        if(!Array.isArray(ar)||!ars.includes(ar[0])) return;
+        const s=(r['Section']||'').trim(); if(!s) return;
+        const who=r['Assessor Name']||'Unknown';
+        imap[s] = imap[s]||{};
+        imap[s][who] = {raw:r['Raw Score (0–40)'], norm:r['Normalised Score'], fb:r['Assessor Feedback']};
+      });
+      const ircd = {};
+      IRC_SECTIONS.forEach(s=>{
+        const entries = Object.entries(imap[s]||{});
+        if(!entries.length) return;
+        ircd[s] = {
+          raw: avg(entries.map(([,d])=>d.raw)),
+          norm: avg(entries.map(([,d])=>d.norm)),
+          fb: entries.filter(([,d])=>d.fb).map(([w,d])=>`${w}: ${d.fb}`),
+        };
+      });
+
+      // capacity
+      const caps = {High:[],Medium:[],Low:[]};
+      cap.forEach(c=>{
+        const ar=c['Assessment Record'];
+        if(!Array.isArray(ar)||!ars.includes(ar[0])) return;
+        const pri=c['Priority']||'Medium';
+        if(!caps[pri]) caps[pri]=[];
+        caps[pri].push({cat:c['Need Category']||'', desc:(c['Description']||'').trim(), src:c['Source']||''});
+      });
+
+      DATA[cid] = {name:CO_NAMES[cid], pillars, irc:ircd, cap:caps};
+    });
+
+    document.getElementById('stamp').textContent =
+      'Data refreshed ' + new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
+    renderTabs();
+    show(0);
+  }catch(e){
+    document.getElementById('content').innerHTML =
+      `<div class="err"><b>Could not load data.</b><br>${esc(e.message)}</div>`;
+  }
+}
+
+// ── COMPUTED ────────────────────────────────────────────────────────────────
+const overallOf   = co => avg(PILLARS.map(p=>co.pillars[p]?.score));
+const potentialOf = co => avg(PILLARS.map(p=>co.pillars[p]?.pot));
+const ircTotalOf  = co => {
+  const v = IRC_SECTIONS.map(s=>co.irc[s]?.norm).filter(x=>x!=null);
+  return v.length ? {total:v.reduce((a,b)=>a+b,0), max:v.length*10} : null;
+};
+const capCountOf  = co => Object.values(co.cap).reduce((a,v)=>a+v.length,0);
+
+// ── RENDER ──────────────────────────────────────────────────────────────────
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = NAVIGATORS.map((n,i)=>
+    `<button class="navtab${i===0?' active':''}" onclick="show(${i})">
+       <span class="nm">${esc(n.name)}</span>
+       <span class="ct">${n.companies.length} companies</span>
+     </button>`).join('');
+}
+
+function show(idx){
+  document.querySelectorAll('.navtab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  const nav = NAVIGATORS[idx];
+  const cos = nav.companies.map(c=>DATA[c]).filter(Boolean);
+  if(!cos.length){ document.getElementById('content').innerHTML='<div class="err">No data.</div>'; return; }
+
+  let h = '';
+
+  // ── Portfolio summary ──
+  h += `<div class="card">
+    <h2>${esc(nav.name)} — Portfolio Summary</h2>
+    <div class="lede">Baseline scores across ${cos.length} companies. Current capability is the average of all scored pillars; potential is the assessed scale-up ceiling.</div>
+    <table><thead><tr>
+      <th>Company</th><th class="c">Current</th><th class="c">Potential</th>
+      <th class="c">Investment readiness</th><th class="c">Capacity needs</th><th class="c">Pillars scored</th>
+    </tr></thead><tbody>`;
+  cos.forEach(co=>{
+    const ov=overallOf(co), pot=potentialOf(co), ir=ircTotalOf(co);
+    const scored = PILLARS.filter(p=>co.pillars[p]?.score!=null).length;
+    h += `<tr>
+      <td><b>${esc(co.name)}</b><br><span style="font-size:12px;color:var(--slate)">${esc(SECTORS[co.name]||'')}</span></td>
+      <td class="c"><span class="pill ${band(ov)}">${ov!=null?ov+'%':'—'}</span></td>
+      <td class="c" style="color:var(--slate)">${pot!=null?pot+'%':'—'}</td>
+      <td class="c">${ir?`<span class="pill ${band((ir.total/ir.max)*100)}">${ir.total}/${ir.max}</span>`
+        :'<span class="pill none">Pending</span>'}</td>
+      <td class="c">${capCountOf(co)}</td>
+      <td class="c" style="color:${scored<10?'var(--amber)':'var(--slate)'}">${scored}/10</td>
+    </tr>`;
+  });
+  h += `</tbody></table></div>`;
+
+  // ── Pillar comparison ──
+  h += `<div class="card">
+    <h2>Pillar Comparison</h2>
+    <div class="lede">Side by side across the portfolio. Blank cells indicate pillars not yet scored.</div>
+    <table><thead><tr><th>Pillar</th>${cos.map(c=>`<th class="c">${esc(c.name)}</th>`).join('')}<th class="c">Avg</th></tr></thead><tbody>`;
+  PILLARS.forEach(pn=>{
+    const vals = cos.map(c=>c.pillars[pn]?.score);
+    const a = avg(vals);
+    h += `<tr><td><b>${esc(pn)}</b></td>`;
+    vals.forEach(v=>{ h += `<td class="c">${v!=null?`<span class="pill ${band(v)}">${v}%</span>`:'<span style="color:var(--rule)">—</span>'}</td>`; });
+    h += `<td class="c" style="font-weight:700;color:${bandColor(a)}">${a!=null?a+'%':'—'}</td></tr>`;
+  });
+  h += `</tbody></table></div>`;
+
+  // ── Portfolio observations ──
+  const capTally = {};
+  cos.forEach(co=>Object.values(co.cap).forEach(items=>
+    items.forEach(it=>{ if(it.cat) capTally[it.cat]=(capTally[it.cat]||0)+1; })));
+  const topCaps = Object.entries(capTally).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  const pAvg = PILLARS.map(pn=>{
+    const v = cos.map(c=>c.pillars[pn]?.score).filter(x=>x!=null);
+    return {pn, a: v.length? Math.round(v.reduce((x,y)=>x+y,0)/v.length):null, n:v.length};
+  }).filter(x=>x.a!=null).sort((a,b)=>a.a-b.a);
+
+  h += `<div class="card"><h2>Portfolio Observations</h2>`;
+  if(pAvg.length){
+    h += `<div class="sec-h">Weakest pillars</div><ul class="obs">`;
+    pAvg.slice(0,3).forEach(x=>h+=`<li><b>${esc(x.pn)}</b> — <span style="color:${bandColor(x.a)};font-weight:700">${x.a}%</span> <span style="color:var(--slate)">(${x.n} ${x.n===1?'company':'companies'})</span></li>`);
+    h += `</ul><div class="sec-h">Strongest pillars</div><ul class="obs">`;
+    pAvg.slice(-3).reverse().forEach(x=>h+=`<li><b>${esc(x.pn)}</b> — <span style="color:${bandColor(x.a)};font-weight:700">${x.a}%</span> <span style="color:var(--slate)">(${x.n} ${x.n===1?'company':'companies'})</span></li>`);
+    h += `</ul>`;
+  }
+  if(topCaps.length){
+    h += `<div class="sec-h">Most common capacity needs</div><ul class="obs">`;
+    topCaps.forEach(([c,n])=>h+=`<li><b>${esc(c)}</b> — flagged ${n} time${n>1?'s':''}</li>`);
+    h += `</ul>`;
+  }
+  h += `</div>`;
+
+  // ── Per-company detail ──
+  h += `<div class="card"><h2>Company Detail</h2>
+    <div class="lede">Click a company to expand full scoring, IRC, capacity needs and assessor commentary.</div>`;
+
+  cos.forEach((co,ci)=>{
+    const ov=overallOf(co), pot=potentialOf(co), ir=ircTotalOf(co);
+    const missing = PILLARS.filter(p=>co.pillars[p]?.score==null);
+
+    h += `<div class="co" id="co${idx}_${ci}">
+      <div class="cohead" onclick="document.getElementById('co${idx}_${ci}').classList.toggle('open')">
+        <span class="chev">▶</span>
+        <span class="nm">${esc(co.name)}</span>
+        <span class="pill ${band(ov)}">${ov!=null?ov+'%':'—'}</span>
+        ${ir?`<span class="pill ${band((ir.total/ir.max)*100)}">IRC ${ir.total}/${ir.max}</span>`
+             :'<span class="pill none">IRC pending</span>'}
+        <span style="font-size:12.5px;color:var(--slate)">${capCountOf(co)} needs</span>
+        <span class="sec">${esc(SECTORS[co.name]||'')}</span>
+      </div>
+      <div class="cobody">
+        <div class="scorerow" style="margin-top:16px">
+          <div class="scoreblock ${band(ov)}"><div class="lbl">Current capability</div>
+            <div class="val">${ov!=null?ov+'%':'—'}</div>
+            <div class="note">avg of ${PILLARS.filter(p=>co.pillars[p]?.score!=null).length} scored pillars</div></div>
+          <div class="scoreblock"><div class="lbl">Scale potential</div>
+            <div class="val" style="color:var(--sage)">${pot!=null?pot+'%':'—'}</div>
+            <div class="note">assessed ceiling</div></div>
+          <div class="scoreblock ${ir?band((ir.total/ir.max)*100):'none'}">
+            <div class="lbl">Investment readiness</div>
+            <div class="val">${ir?ir.total+'/'+ir.max:'Pending'}</div>
+            <div class="note">${ir?'IRC normalised':'not yet assessed'}</div></div>
+        </div>`;
+
+    if(missing.length) h += `<div class="gap"><b>Data gap:</b> ${missing.length} of 10 pillars not yet scored — ${missing.map(esc).join(', ')}</div>`;
+
+    // Pillars
+    h += `<div class="sec-h">Business Fundamentals</div>
+      <table><thead><tr><th>Pillar</th><th class="c">Score</th><th class="c">Potential</th>
+      <th style="width:130px">Profile</th><th>Assessors</th></tr></thead><tbody>`;
+    PILLARS.forEach(pn=>{
+      const d=co.pillars[pn]||{}, v=d.score;
+      h += `<tr><td><b>${esc(pn)}</b></td>
+        <td class="c">${v!=null?`<span class="pill ${band(v)}">${v}%</span>`:'<span class="pill none">—</span>'}</td>
+        <td class="c" style="color:var(--slate)">${d.pot!=null?d.pot+'%':'—'}</td>
+        <td>${v!=null?`<div class="bar"><i style="width:${v}%;background:${bandColor(v)}"></i></div>`:''}</td>
+        <td style="font-size:12px;color:var(--slate)">${(d.assessors||[]).map(a=>esc(a.split(' ')[0])).join(', ')||'—'}</td>
+      </tr>`;
+    });
+    h += `</tbody></table>`;
+
+    // IRC
+    h += `<div class="sec-h">Investment Readiness (IRC)</div>`;
+    if(ir){
+      h += `<table><thead><tr><th>Section</th><th class="c">Raw /40</th><th class="c">Score /10</th><th>Assessor feedback</th></tr></thead><tbody>`;
+      IRC_SECTIONS.forEach(s=>{
+        const d=co.irc[s];
+        h += `<tr><td><b>${esc(s)}</b></td>
+          <td class="c">${d?.raw!=null?d.raw+'/40':'—'}</td>
+          <td class="c">${d?.norm!=null?`<span class="pill ${band(d.norm*10)}">${d.norm}/10</span>`:'<span class="pill none">—</span>'}</td>
+          <td style="font-size:12.5px;color:var(--slate)">${d?.fb?.length?esc(d.fb.join(' | ')):'—'}</td></tr>`;
+      });
+      h += `</tbody></table>`;
+    } else {
+      h += `<div class="empty">IRC assessment not yet conducted for this company.</div>`;
+    }
+
+    // Capacity
+    h += `<div class="sec-h">Capacity Building Needs</div>`;
+    let anyCap=false;
+    ['High','Medium','Low'].forEach(pri=>{
+      const items=co.cap[pri]||[];
+      if(!items.length) return;
+      anyCap=true;
+      h += `<div class="capgrp ${pri}"><h4>${pri} priority (${items.length})</h4>
+        <table><thead><tr><th>Category</th><th>Description</th><th style="width:150px">Source</th></tr></thead><tbody>`;
+      items.forEach(it=>{
+        h += `<tr><td><b>${esc(it.cat)}</b></td><td>${esc(it.desc)}</td>
+          <td style="font-size:12px;color:var(--slate)">${esc(it.src)}</td></tr>`;
+      });
+      h += `</tbody></table></div>`;
+    });
+    if(!anyCap) h += `<div class="empty">No capacity needs recorded.</div>`;
+
+    // Commentary
+    const withNotes = PILLARS.filter(p=>co.pillars[p]?.notes?.length);
+    if(withNotes.length){
+      h += `<div class="sec-h">Assessor Commentary</div>`;
+      withNotes.forEach(pn=>{
+        const d=co.pillars[pn];
+        h += `<div style="margin-bottom:12px">
+          <div style="font-weight:650;font-size:13.5px;margin-bottom:4px">${esc(pn)}
+            <span style="color:${bandColor(d.score)};font-weight:700">${d.score!=null?' · '+d.score+'%':''}</span></div>`;
+        d.notes.forEach(([who,note])=>{
+          h += `<div class="note"><b>${esc(who)}:</b> ${esc(note.trim())}</div>`;
+        });
+        h += `</div>`;
+      });
+    }
+
+    h += `</div></div>`;
+  });
+
+  h += `</div>`;
+
+  h += `<div class="card" style="background:var(--stone)">
+    <div style="font-size:12.5px;color:var(--slate)">
+      All scores are baseline assessments from the GIZ SME Programme MEL system. Scores are averages across
+      all assessors who scored that pillar, taking the most recent submission per assessor. Companies with
+      fewer than 10 scored pillars are not directly comparable to those with full coverage.
+    </div></div>`;
+
+  document.getElementById('content').innerHTML = h;
+}
+
+function expandAll(open){
+  document.querySelectorAll('.co').forEach(c=>c.classList.toggle('open',open));
+}
+
+function exportCSV(){
+  const rows = [['Navigator','Company','Sector','Pillar','Score','Potential','Assessors']];
+  NAVIGATORS.forEach(nav=>{
+    nav.companies.forEach(cid=>{
+      const co=DATA[cid]; if(!co) return;
+      PILLARS.forEach(pn=>{
+        const d=co.pillars[pn]||{};
+        rows.push([nav.name, co.name, SECTORS[co.name]||'', pn,
+          d.score!=null?d.score:'', d.pot!=null?d.pot:'', (d.assessors||[]).join('; ')]);
+      });
+    });
+  });
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='navigator_portfolios_baseline_2026.csv';
+  a.click();
+}
+
+load();
+</script>
+</body>
+</html>
