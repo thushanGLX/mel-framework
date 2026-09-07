@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRC Assessment · GIZ SME Programme</title>
+<style>
+:root{
+  --forest:#0D5C45; --sage:#3D8B70; --mist:#E8F5EE;
+  --ink:#1A1917; --stone:#F5F3EE; --cloud:#FAFAF7;
+  --slate:#6B6B64; --rule:#DFDDD6; --white:#fff;
+  --green:#1D9E75; --ltgreen:#DFF3EB;
+  --amber:#B07A1A; --ltamber:#FEF3E2;
+  --red:#C94F3E; --ltred:#FDECEA;
+  --blue:#185FA5; --ltblue:#E6F1FB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  background:var(--cloud);color:var(--ink);line-height:1.5;font-size:15px}
+.topbar{background:var(--forest);color:#fff;padding:14px 28px;display:flex;
+  align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.topbar h1{font-size:17px;font-weight:600}
+.topbar .sub{font-size:13px;opacity:.78}
+.wrap{max-width:1150px;margin:0 auto;padding:24px}
+.card{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:22px 24px;margin-bottom:18px}
+.card h2{font-size:18px;font-weight:650;margin-bottom:4px}
+.card .lede{font-size:13.5px;color:var(--slate);margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:var(--ink)}
+input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--rule);
+  border-radius:7px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage)}
+textarea{resize:vertical;min-height:60px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.fld{margin-bottom:14px}
+.btn{background:var(--forest);color:#fff;border:none;border-radius:7px;padding:11px 22px;
+  font-size:14.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn:hover{background:#0a4a38}
+.btn:disabled{background:var(--slate);cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--rule)}
+.btn.ghost:hover{background:var(--mist);border-color:var(--sage)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* Prefilled profile fields */
+.prefill{background:var(--ltgreen);border:1.5px solid var(--green);border-radius:7px;
+  padding:9px 12px;font-size:14px;display:flex;justify-content:space-between;
+  align-items:center;gap:10px}
+.prefill .v{flex:1}
+.prefill .tag{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--green);
+  text-transform:uppercase;white-space:nowrap}
+.missing-tag{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--amber);
+  text-transform:uppercase;margin-left:6px}
+
+/* Section nav */
+.secnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.secbtn{background:#fff;border:1.5px solid var(--rule);border-radius:20px;
+  padding:7px 14px;font-size:12.5px;cursor:pointer;font-family:inherit;color:var(--ink);
+  display:flex;align-items:center;gap:6px}
+.secbtn:hover{border-color:var(--sage)}
+.secbtn.active{background:var(--forest);border-color:var(--forest);color:#fff}
+.secbtn .cnt{font-size:11px;opacity:.7;font-weight:700}
+.secbtn.done{border-color:var(--green);background:var(--ltgreen)}
+.secbtn.done.active{background:var(--forest);color:#fff}
+
+/* Question rows */
+.qsec{display:none}
+.qsec.show{display:block}
+.sechead{background:var(--forest);color:#fff;padding:12px 18px;border-radius:8px 8px 0 0;
+  font-weight:650;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.sechead .prog{font-size:12.5px;opacity:.85;font-weight:500}
+.qlist{border:1px solid var(--rule);border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+.q{padding:16px 18px;border-bottom:1px solid var(--rule);background:#fff}
+.q:last-child{border-bottom:none}
+.q:nth-child(even){background:var(--cloud)}
+.q.answered{border-left:3px solid var(--green)}
+.qtop{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.qno{background:var(--stone);color:var(--slate);font-size:12px;font-weight:700;
+  padding:3px 8px;border-radius:5px;flex-shrink:0;min-width:32px;text-align:center}
+.qtxt{flex:1;font-size:14.5px;font-weight:500}
+.scale{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sc{flex:1;min-width:90px;border:1.5px solid var(--rule);border-radius:7px;
+  padding:8px 6px;text-align:center;cursor:pointer;background:#fff;transition:.12s;
+  font-family:inherit;font-size:13px;color:var(--ink)}
+.sc:hover{border-color:var(--sage);background:var(--mist)}
+.sc .n{font-weight:700;font-size:17px;display:block}
+.sc .l{font-size:11px;opacity:.8;display:block;margin-top:1px}
+.sc.on[data-v="1"]{background:var(--ltred);border-color:var(--red);color:var(--red)}
+.sc.on[data-v="2"]{background:var(--ltamber);border-color:var(--amber);color:var(--amber)}
+.sc.on[data-v="3"]{background:var(--ltblue);border-color:var(--blue);color:var(--blue)}
+.sc.on[data-v="4"]{background:var(--ltgreen);border-color:var(--green);color:var(--green)}
+.cmts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmts label{font-size:11.5px;color:var(--slate);font-weight:600;margin-bottom:3px}
+.cmts textarea{min-height:46px;font-size:13px;padding:7px 10px}
+.cmts .founder label{color:var(--blue)}
+.cmts .founder textarea{border-color:#c9dcf0}
+.cmts .founder textarea:focus{border-color:var(--blue)}
+
+/* Score summary */
+.scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.sbox{border:1.5px solid var(--rule);border-radius:8px;padding:12px 14px;background:var(--stone)}
+.sbox .lbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--slate);margin-bottom:3px}
+.sbox .val{font-size:26px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.sbox .sub{font-size:11.5px;color:var(--slate);margin-top:3px}
+.sbox.good{background:var(--ltgreen);border-color:var(--green)} .sbox.good .val{color:var(--green)}
+.sbox.mid{background:var(--ltamber);border-color:var(--amber)} .sbox.mid .val{color:var(--amber)}
+.sbox.low{background:var(--ltred);border-color:var(--red)} .sbox.low .val{color:var(--red)}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--forest);color:#fff;text-align:left;padding:9px 12px;font-size:12.5px;font-weight:600}
+th.c{text-align:center}
+td{padding:8px 12px;border-bottom:1px solid var(--rule)}
+td.c{text-align:center}
+tr:nth-child(even) td{background:var(--cloud)}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-weight:700;font-size:13px}
+.pill.good{background:var(--ltgreen);color:var(--green)}
+.pill.mid{background:var(--ltamber);color:var(--amber)}
+.pill.low{background:var(--ltred);color:var(--red)}
+.pill.none{background:var(--stone);color:var(--slate);font-weight:500;font-size:12px}
+
+.msg{padding:12px 16px;border-radius:0 7px 7px 0;margin:12px 0;font-size:14px}
+.msg.ok{background:var(--ltgreen);border-left:4px solid var(--green)}
+.msg.err{background:var(--ltred);border-left:4px solid var(--red)}
+.msg.info{background:var(--ltamber);border-left:4px solid var(--amber)}
+.hidden{display:none}
+.savebar{position:sticky;bottom:0;background:#fff;border-top:1.5px solid var(--rule);
+  padding:14px 24px;display:flex;justify-content:space-between;align-items:center;
+  gap:14px;flex-wrap:wrap;box-shadow:0 -2px 10px rgba(0,0,0,.06);z-index:90}
+.savebar .stat{font-size:13.5px;color:var(--slate)}
+
+.pill.basic{background:var(--ltamber);color:#8a5f14}
+.sbox.basic{background:var(--ltamber);border-color:#8a5f14} .sbox.basic .val{color:#8a5f14}
+
+/* AI suggestion states */
+.q.ai{border-left:3px solid var(--blue);background:#f7fbff}
+.q.ai:nth-child(even){background:#f2f8fe}
+.q.confirmed{border-left:3px solid var(--green)}
+.aibadge{display:inline-flex;align-items:center;gap:5px;background:var(--ltblue);
+  color:var(--blue);font-size:10.5px;font-weight:700;letter-spacing:.04em;
+  padding:3px 8px;border-radius:5px;text-transform:uppercase;margin-left:8px}
+.aiev{background:var(--ltblue);border-left:3px solid var(--blue);padding:8px 12px;
+  border-radius:0 6px 6px 0;font-size:12.5px;color:#1a4d7a;margin:8px 0}
+.aiev b{color:var(--blue)}
+.aiev.nodata{background:var(--ltamber);border-color:var(--amber);color:#7a5310}
+.sc.suggested{border-style:dashed;border-width:2px;opacity:.9}
+.confirmrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.mini{padding:5px 12px;font-size:12.5px;border-radius:6px;border:1.5px solid var(--rule);
+  background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);font-weight:600}
+.mini:hover{border-color:var(--sage);background:var(--mist)}
+.mini.ok{border-color:var(--green);color:var(--green)}
+.mini.ok:hover{background:var(--ltgreen)}
+.aipanel{background:linear-gradient(180deg,#f7fbff,#fff);border:1.5px solid var(--blue);
+  border-radius:10px;padding:20px 22px;margin-bottom:18px}
+.aipanel h2{color:var(--blue)}
+.prog{height:8px;background:var(--stone);border-radius:5px;overflow:hidden;margin:12px 0}
+.prog i{display:block;height:100%;background:var(--blue);transition:width .3s;border-radius:5px}
+.stat-row{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--slate);margin-top:8px}
+.stat-row b{color:var(--ink)}
+
+@media(max-width:700px){
+  .grid2,.cmts{grid-template-columns:1fr}
+  .wrap{padding:14px}
+  .sc{min-width:70px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>IRC Investment Readiness Assessment</h1>
+    <div class="sub">GIZ SME Programme · Good Life X · 80 questions · 8 areas · scored 1–4</div>
+  </div>
+  <div class="sub" id="stamp"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- SETUP -->
+  <div class="card" id="setup">
+    <h2>Assessment Setup</h2>
+    <div class="lede">Select the company and enter assessor details to begin.</div>
+    <div class="grid3">
+      <div class="fld"><label>Company</label>
+        <select id="company"><option value="">Loading…</option></select></div>
+      <div class="fld"><label>Assessor name</label>
+        <input id="assessor" placeholder="Your full name"></div>
+      <div class="fld"><label>Assessment round</label>
+        <select id="round"><option>Baseline</option><option>Midpoint</option><option>Endpoint</option></select></div>
+    </div>
+    <div class="grid3">
+      <div class="fld"><label>Date of assessment</label><input type="date" id="adate"></div>
+      <div class="fld"><label>Person who attended the call</label>
+        <input id="attendee" placeholder="If different from founder"></div>
+      <div class="fld"><label>Their email</label><input id="attendeeEmail" placeholder="Email address"></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="startAssessment()">Start assessment</button></div>
+    <div id="setupMsg"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="card hidden" id="profileCard">
+    <h2>Company Profile</h2>
+    <div class="lede">Fields marked <span style="color:var(--green);font-weight:700">ON FILE</span> are pulled from the Companies table. Fill in anything marked <span style="color:var(--amber);font-weight:700">MISSING</span>.</div>
+    <div id="profileFields"></div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="hidden" id="qCard">
+
+    <!-- AI PRE-FILL -->
+    <div class="aipanel" id="aiPanel">
+      <h2>Pre-fill from existing evidence</h2>
+      <div class="lede">Draft scores are proposed from the diagnostic report and existing MEL commentary, each with the evidence behind it. Nothing is saved until you confirm. Questions with no supporting evidence are flagged for your judgement.</div>
+
+      <div class="fld">
+        <label>Diagnostic report text (optional but strongly recommended)</label>
+        <textarea id="diagText" rows="4" placeholder="Paste the full diagnostic report for this company. Without it, pre-fill relies only on MEL commentary and will flag far more questions as needing your judgement."></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="aiBtn" onclick="runPrefill()" style="background:var(--blue)">Generate draft scores</button>
+        <button class="btn ghost" onclick="confirmAllAI()">Confirm all suggestions</button>
+        <button class="btn ghost" onclick="clearAI()">Clear suggestions</button>
+      </div>
+      <div class="prog hidden" id="aiProg"><i style="width:0%"></i></div>
+      <div id="aiMsg"></div>
+      <div class="stat-row" id="aiStats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Scoring Guide</h2>
+      <div class="scoregrid">
+        <div class="sbox low"><div class="lbl">1 · Poor</div><div class="sub" style="margin-top:6px">No systems or understanding in place; significant gaps exist.</div></div>
+        <div class="sbox mid"><div class="lbl">2 · Basic</div><div class="sub" style="margin-top:6px">Some elements exist but informal, inconsistent or poorly implemented.</div></div>
+        <div class="sbox" style="background:var(--ltblue);border-color:var(--blue)"><div class="lbl">3 · Adequate</div><div class="sub" style="margin-top:6px">Acceptable structure and understanding; some improvements needed.</div></div>
+        <div class="sbox good"><div class="lbl">4 · Strong</div><div class="sub" style="margin-top:6px">Fully established systems or clear understanding; best practices followed.</div></div>
+      </div>
+      <div class="lede" style="margin:12px 0 0">Scores are reported on the Excel scale: raw out of 40 per area, normalised out of 10 per area, 80 overall. IRC is never converted to a percentage.</div>
+      <div style="display:none">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Live Score</h2>
+      <div class="scoregrid" id="liveScore"></div>
+      <table id="secTable"><thead><tr>
+        <th>Area</th><th class="c">Answered</th><th class="c">Raw /40</th><th class="c">Normalised /10</th><th class="c">Rating</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="secnav" id="secnav"></div>
+    <div id="sections"></div>
+
+    <div class="card">
+      <h2>Overall Assessor Feedback</h2>
+      <div class="lede">Summary observations from the assessment team.</div>
+      <textarea id="overallFeedback" rows="5" placeholder="Overall feedback, key observations, recommended next steps…"></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="savebar hidden" id="savebar">
+  <div class="stat" id="saveStat">0 of 80 answered</div>
+  <div class="actions">
+    <button class="btn ghost" onclick="saveDraft()">Save draft locally</button>
+    <button class="btn ghost" onclick="exportCSV()">Export CSV</button>
+    <button class="btn" id="submitBtn" onclick="submitAll()">Submit to Airtable</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const AIRTABLE_BASE  = 'appPFQWqbIP5Twi4r';
+const AIRTABLE_TOKEN = 'pat1Oa1Z0A4zWYneN.1f721a20a51c8f40fca4dd8622a43689002615d2b051d50ffbd09dfdc8348b2d';
+
+const IRC_QUESTIONS = [[16, "Founding Team", "Is there a clearly defined leadership structure?"], [17, "Founding Team", "Do the founders have prior entrepreneurial or industry experience?"], [18, "Founding Team", "Are roles and responsibilities clearly distributed among team members?"], [19, "Founding Team", "Does the team have technical and business development capabilities?"], [20, "Founding Team", "Is there a demonstrated commitment to the venture?"], [21, "Founding Team", "Does the team seek mentorship or support when needed?"], [22, "Founding Team", "Are key decisions made collaboratively and efficiently?"], [23, "Founding Team", "Has the team previously managed any growth or fundraising cycles?"], [24, "Founding Team", "Is there a plan for team expansion as the company scales?"], [25, "Founding Team", "Are there any governance mechanisms in place (e.g., board, advisors)?"], [26, "Data Room & Due Diligence", "Is a basic pitch deck available and up to date?"], [27, "Data Room & Due Diligence", "Are financial statements (P&L, balance sheet) available?"], [28, "Data Room & Due Diligence", "Has the startup documented legal structure and registration?"], [29, "Data Room & Due Diligence", "Are founder agreements and equity allocations documented?"], [30, "Data Room & Due Diligence", "Are key customer or vendor contracts accessible?"], [31, "Data Room & Due Diligence", "Is IP or proprietary technology documented and protected?"], [32, "Data Room & Due Diligence", "Are there audited accounts or external validations?"], [33, "Data Room & Due Diligence", "Is data organized and easy to share with potential investors?"], [34, "Data Room & Due Diligence", "Is there a financial model with projections?"], [35, "Data Room & Due Diligence", "Is a due diligence checklist completed or in progress?"], [36, "Data Analytics", "Does the startup track key operational metrics?"], [37, "Data Analytics", "Are customer/user data regularly collected and analyzed?"], [38, "Data Analytics", "Is there a dashboard or system for visualizing performance?"], [39, "Data Analytics", "Does the team use data to guide strategic decisions?"], [40, "Data Analytics", "Are there tools in place to measure impact (e.g., waste reduction)?"], [41, "Data Analytics", "Are marketing or sales metrics tracked (e.g., conversion rate)?"], [42, "Data Analytics", "Is financial data monitored in real time?"], [43, "Data Analytics", "Is there a basic CRM or ERP system in use?"], [44, "Data Analytics", "Are monthly or quarterly reports produced and reviewed?"], [45, "Data Analytics", "Is benchmarking against industry norms practiced?"], [46, "Market & Competition", "Is the target market well defined?"], [47, "Market & Competition", "Does the team understand customer pain points?"], [48, "Market & Competition", "Is there a validated market demand for the product/service?"], [49, "Market & Competition", "Has a market size estimation been done?"], [50, "Market & Competition", "Are key competitors identified?"], [51, "Market & Competition", "Is there a clear differentiation or unique value proposition?"], [52, "Market & Competition", "Is the pricing strategy competitive?"], [53, "Market & Competition", "Are distribution channels defined?"], [54, "Market & Competition", "Is there a go-to-market plan?"], [55, "Market & Competition", "Has the team considered expansion opportunities?"], [56, "Product", "Is the product/service functional and being used?"], [57, "Product", "Is there a documented product roadmap?"], [58, "Product", "Does the product align with circular economy / prevention of food loss principles?"], [59, "Product", "Is the product compliant with local regulations?"], [60, "Product", "Has the product been tested or piloted with users?"], [61, "Product", "Is feedback from users used to refine the product?"], [62, "Product", "Are there sustainability features or benefits?"], [63, "Product", "Is the production or delivery process scalable?"], [64, "Product", "Are quality control measures in place?"], [65, "Product", "Is there IP or technology innovation involved?"], [66, "Marketing & Sales", "Is there a formal marketing plan?"], [67, "Marketing & Sales", "Are target customer personas identified?"], [68, "Marketing & Sales", "Does the startup have online presence (website, social)?"], [69, "Marketing & Sales", "Are marketing channels selected based on customer behavior?"], [70, "Marketing & Sales", "Is branding consistent and effective?"], [71, "Marketing & Sales", "Is there a sales team or dedicated resource?"], [72, "Marketing & Sales", "Are sales materials (brochures, proposals) available?"], [73, "Marketing & Sales", "Are sales KPIs tracked (conversion, CAC, etc.)?"], [74, "Marketing & Sales", "Are partnerships or distribution relationships in place?"], [75, "Marketing & Sales", "Are feedback loops used to adjust messaging or tactics?"], [76, "Customer Growth", "Is the number of customers increasing over time?"], [77, "Customer Growth", "Are customer acquisition costs sustainable?"], [78, "Customer Growth", "Are there repeat customers or strong retention metrics?"], [79, "Customer Growth", "Is there a process to onboard new customers effectively?"], [80, "Customer Growth", "Are there testimonials or case studies?"], [81, "Customer Growth", "Is customer growth monitored and addressed?"], [82, "Customer Growth", "Is the product/service gaining traction in new segments?"], [83, "Customer Growth", "Are upselling or cross-selling strategies implemented?"], [84, "Customer Growth", "Are users becoming advocates or referrers?"], [85, "Customer Growth", "Are customer satisfaction metrics tracked?"], [86, "Traction, Investment Needs & Capital Raise Readiness", "Has the startup raised funding before? If yes, how much?"], [87, "Traction, Investment Needs & Capital Raise Readiness", "What is the current monthly revenue?"], [88, "Traction, Investment Needs & Capital Raise Readiness", "What is the startup’s current funding need (amount and use)?"], [89, "Traction, Investment Needs & Capital Raise Readiness", "Is the startup seeking equity, debt, or blended capital?"], [90, "Traction, Investment Needs & Capital Raise Readiness", "Has a valuation or capital table been prepared?"], [91, "Traction, Investment Needs & Capital Raise Readiness", "Does the team understand investor expectations?"], [92, "Traction, Investment Needs & Capital Raise Readiness", "Is there a timeline for fundraising?"], [93, "Traction, Investment Needs & Capital Raise Readiness", "Are pitch materials and financial models ready?"], [94, "Traction, Investment Needs & Capital Raise Readiness", "Is the team familiar with term sheets or due diligence processes?"], [95, "Traction, Investment Needs & Capital Raise Readiness", "Has the startup had any conversations with investors?"]];
+
+const PROFILE_FIELDS = [[1, "Name of Enterprise", "Company Name"], [2, "Name of Founder/s", "Founder Name"], [3, "Email", "Email"], [4, "Contact No", "Contact Number"], [5, "Name of person who attended the call (if different from founder)", null], [6, "Email Address of person who attended the call", null], [7, "Website of the company", "Website"], [8, "Place of Operation", "Location"], [9, "Type of Legal Registration", "Legal Registration"], [10, "Brief Description of the business", "Business Description"], [11, "Brief of the company’s business model. What are the products/services offered", "Business Model"], [12, "Primary Sector of Operation", "Primary Sector"], [13, "Other related Sectors", "Other Sectors"], [14, "Who are the suppliers (if any)", "Suppliers"], [15, "Who are the customers (if any)", "Customers"]];
+
+
+const SECTIONS = [...new Set(IRC_QUESTIONS.map(q=>q[1]))];
+const SCALE = [[1,'Poor'],[2,'Basic'],[3,'Adequate'],[4,'Strong']];
+
+let COMPANIES = {}, answers = {}, profileVals = {}, currentSec = 0;
+
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// IRC bands on AVERAGE QUESTION SCORE (1-4), per the Excel scoring guide.
+// Never converted to a percentage — min possible is 1, not 0.
+const avgBand = a => a==null?'none': a>=3.5?'good' : a>=2.5?'mid' : a>=1.5?'basic':'low';
+const avgLabel = a => a==null?'—' : a>=3.5?'Strong' : a>=2.5?'Adequate' : a>=1.5?'Basic':'Poor';
+const band = avgBand;
+
+async function at(table, opts={}){
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(table)}` + (opts.q||'');
+  const r = await fetch(url, {
+    method: opts.method||'GET',
+    headers:{Authorization:'Bearer '+AIRTABLE_TOKEN,'Content-Type':'application/json'},
+    body: opts.body?JSON.stringify(opts.body):undefined
+  });
+  if(!r.ok) throw new Error(`${table}: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+// ── LOAD COMPANIES ──────────────────────────────────────────────────────────
+async function loadCompanies(){
+  try{
+    const j = await at('Companies','');
+    const sel = document.getElementById('company');
+    sel.innerHTML = '<option value="">Select a company…</option>';
+    j.records.forEach(r=>{
+      COMPANIES[r.id] = r.fields;
+      const nm = r.fields['Company Name'] || r.fields['Name'] || Object.values(r.fields)[0] || r.id;
+      sel.innerHTML += `<option value="${r.id}">${esc(nm)}</option>`;
+    });
+    document.getElementById('adate').value = new Date().toISOString().slice(0,10);
+  }catch(e){
+    document.getElementById('setupMsg').innerHTML =
+      `<div class="msg err"><b>Could not load companies.</b><br>${esc(e.message)}</div>`;
+  }
+}
+
+// ── START ───────────────────────────────────────────────────────────────────
+function startAssessment(){
+  const cid = document.getElementById('company').value;
+  const who = document.getElementById('assessor').value.trim();
+  if(!cid || !who){
+    document.getElementById('setupMsg').innerHTML =
+      '<div class="msg err">Select a company and enter your name.</div>'; return;
+  }
+  document.getElementById('setupMsg').innerHTML='';
+  renderProfile(cid);
+  renderQuestions();
+  document.getElementById('profileCard').classList.remove('hidden');
+  document.getElementById('qCard').classList.remove('hidden');
+  document.getElementById('savebar').classList.remove('hidden');
+  loadDraft();
+  updateScores();
+  window.scrollTo({top:document.getElementById('profileCard').offsetTop-70,behavior:'smooth'});
+}
+
+// ── PROFILE ─────────────────────────────────────────────────────────────────
+function renderProfile(cid){
+  const co = COMPANIES[cid]||{};
+  let h='<div class="grid2">';
+  PROFILE_FIELDS.forEach(([no,q,fieldName])=>{
+    const existing = fieldName ? co[fieldName] : null;
+    const key = 'p'+no;
+    if(existing){
+      profileVals[key] = existing;
+      h += `<div class="fld"><label>${esc(q)}</label>
+        <div class="prefill"><span class="v">${esc(existing)}</span><span class="tag">On file</span></div></div>`;
+    } else {
+      const pre = (no===5) ? document.getElementById('attendee').value
+                : (no===6) ? document.getElementById('attendeeEmail').value : '';
+      const long = [10,11,14,15].includes(no);
+      h += `<div class="fld"><label>${esc(q)}<span class="missing-tag">Missing</span></label>` +
+        (long ? `<textarea id="${key}" rows="2" oninput="profileVals['${key}']=this.value">${esc(pre)}</textarea>`
+              : `<input id="${key}" value="${esc(pre)}" oninput="profileVals['${key}']=this.value">`) +
+        `</div>`;
+      if(pre) profileVals[key]=pre;
+    }
+  });
+  h+='</div>';
+  document.getElementById('profileFields').innerHTML = h;
+}
+
+// ── QUESTIONS ───────────────────────────────────────────────────────────────
+function renderQuestions(){
+  document.getElementById('secnav').innerHTML = SECTIONS.map((s,i)=>{
+    const n = IRC_QUESTIONS.filter(q=>q[1]===s).length;
+    return `<button class="secbtn${i===0?' active':''}" id="sb${i}" onclick="showSec(${i})">
+      ${esc(s)} <span class="cnt" id="sc${i}">0/${n}</span></button>`;
+  }).join('');
+
+  document.getElementById('sections').innerHTML = SECTIONS.map((s,i)=>{
+    const qs = IRC_QUESTIONS.filter(q=>q[1]===s);
+    return `<div class="qsec${i===0?' show':''}" id="qs${i}">
+      <div class="sechead"><span>${esc(s)}</span><span class="prog" id="sp${i}">0 of ${qs.length} answered</span></div>
+      <div class="qlist">${qs.map(([no,,txt])=>`
+        <div class="q" id="q${no}">
+          <div class="qtop"><span class="qno">${no}</span><span class="qtxt">${esc(txt)}</span></div>
+          <div class="scale">${SCALE.map(([v,l])=>
+            `<button class="sc" data-v="${v}" id="s${no}_${v}" onclick="setScore(${no},${v})">
+              <span class="n">${v}</span><span class="l">${l}</span></button>`).join('')}</div>
+          <div class="cmts">
+            <div class="founder"><label>Company / founder position</label>
+              <textarea id="f${no}" placeholder="What the company says or claims (optional)…"
+                oninput="setNote(${no},'founder',this.value)"></textarea></div>
+            <div><label>Assessor comment</label>
+              <textarea id="a${no}" placeholder="Your observation…"
+                oninput="setNote(${no},'assessor',this.value)"></textarea></div>
+          </div>
+        </div>`).join('')}</div></div>`;
+  }).join('');
+}
+
+function showSec(i){
+  currentSec=i;
+  document.querySelectorAll('.qsec').forEach((e,j)=>e.classList.toggle('show',i===j));
+  document.querySelectorAll('.secbtn').forEach((e,j)=>e.classList.toggle('active',i===j));
+  window.scrollTo({top:document.getElementById('secnav').offsetTop-70,behavior:'smooth'});
+}
+
+function setScore(no,v){
+  answers[no] = answers[no]||{};
+  answers[no].score = v;
+  answers[no].confirmed = true;
+  SCALE.forEach(([sv])=>{
+    const b=document.getElementById(`s${no}_${sv}`);
+    b.classList.toggle('on',sv===v); b.classList.remove('suggested');
+  });
+  const qe=document.getElementById('q'+no);
+  qe.classList.add('answered','confirmed'); qe.classList.remove('ai');
+  const cr=document.getElementById('cr'+no); if(cr) cr.remove();
+  updateScores(); saveDraft(true);
+}
+function setNote(no,who,val){
+  answers[no]=answers[no]||{};
+  answers[no][who]=val;
+  saveDraft(true);
+}
+
+// ── SCORING ─────────────────────────────────────────────────────────────────
+function updateScores(){
+  const rows=[]; let totalRaw=0, totalNorm=0, answered=0, secsWithData=0;
+
+  SECTIONS.forEach((s,i)=>{
+    const qs = IRC_QUESTIONS.filter(q=>q[1]===s);
+    const sc = qs.map(q=>answers[q[0]]?.score).filter(v=>v!=null);
+    const raw = sc.reduce((a,b)=>a+b,0);
+    const norm = sc.length ? +(raw/4).toFixed(2) : null;
+    const avg  = sc.length ? +(raw/sc.length).toFixed(2) : null;
+    answered += sc.length;
+    if(sc.length){ totalRaw+=raw; totalNorm+=norm; secsWithData++; }
+    document.getElementById('sc'+i).textContent = `${sc.length}/${qs.length}`;
+    document.getElementById('sp'+i).textContent = `${sc.length} of ${qs.length} answered`;
+    document.getElementById('sb'+i).classList.toggle('done', sc.length===qs.length);
+    rows.push(`<tr><td><b>${esc(s)}</b></td>
+      <td class="c">${sc.length}/${qs.length}</td>
+      <td class="c">${sc.length?raw+'/40':'—'}</td>
+      <td class="c">${norm!=null?norm.toFixed(2)+'/10':'—'}</td>
+      <td class="c">${avg!=null?`<span class="pill ${avgBand(avg)}">${avgLabel(avg)}</span>`:'<span class="pill none">—</span>'}</td></tr>`);
+  });
+
+  document.querySelector('#secTable tbody').innerHTML = rows.join('');
+  const overallAvg = answered ? +(totalRaw/answered).toFixed(2) : null;
+  const nAI = Object.values(answers).filter(a=>a.ai && !a.confirmed).length;
+  const nConf = Object.values(answers).filter(a=>a.confirmed).length;
+
+  document.getElementById('liveScore').innerHTML = `
+    <div class="sbox"><div class="lbl">Answered</div><div class="val">${answered}<span style="font-size:15px;color:var(--slate)">/80</span></div>
+      ${nAI?`<div class="sub" style="color:var(--blue)">${nAI} awaiting confirmation</div>`:'<div class="sub">all confirmed</div>'}</div>
+    <div class="sbox"><div class="lbl">Total raw</div><div class="val">${totalRaw}<span style="font-size:15px;color:var(--slate)">/320</span></div></div>
+    <div class="sbox"><div class="lbl">Normalised</div><div class="val">${totalNorm.toFixed(2)}<span style="font-size:15px;color:var(--slate)">/80</span></div>
+      <div class="sub">${secsWithData} of 8 areas scored</div></div>
+    <div class="sbox ${avgBand(overallAvg)}"><div class="lbl">Overall rating</div>
+      <div class="val" style="font-size:22px">${avgLabel(overallAvg)}</div>
+      <div class="sub">avg ${overallAvg!=null?overallAvg.toFixed(2):'—'} of 4</div></div>`;
+
+  document.getElementById('saveStat').textContent =
+    `${answered} of 80 answered` + (nAI?` · ${nAI} suggestions to confirm`:'') + (nConf?` · ${nConf} confirmed`:'');
+  updateAIStats();
+}
+
+
+// ── AI PRE-FILL ─────────────────────────────────────────────────────────────
+const WORKER_URL = 'https://melreportgen.thushan-6bf.workers.dev/';
+
+async function gatherEvidence(cid){
+  // Pull existing MEL commentary for this company from Airtable
+  const [recs, fund, cap] = await Promise.all([
+    at('Assesment Records'), at('Fundamental Scores'), at('Capacity Building')
+  ]);
+  const ars = recs.records.filter(r=>(r.fields['Company']||[]).includes(cid)).map(r=>r.id);
+
+  const pillarNotes = fund.records
+    .filter(r=>(r.fields['Assessment Record']||[]).some(a=>ars.includes(a)))
+    .filter(r=>r.fields['Commentary'])
+    .map(r=>`[${r.fields['Pillar Name']} · scored ${r.fields['Score (0–100)']??'—'} by ${r.fields['Assessor Name']||'?'}] ${r.fields['Commentary']}`);
+
+  const capNotes = cap.records
+    .filter(r=>(r.fields['Assessment Record']||[]).some(a=>ars.includes(a)))
+    .map(r=>`[Capacity need · ${r.fields['Priority']||'?'} priority · ${r.fields['Need Category']||''}] ${r.fields['Description']||''}`);
+
+  return {pillarNotes, capNotes};
+}
+
+async function runPrefill(){
+  const cid = document.getElementById('company').value;
+  const btn = document.getElementById('aiBtn');
+  const msg = document.getElementById('aiMsg');
+  const prog= document.getElementById('aiProg');
+  if(!cid){ msg.innerHTML='<div class="msg err">Select a company first.</div>'; return; }
+
+  btn.disabled=true; btn.textContent='Reading evidence…';
+  msg.innerHTML=''; prog.classList.remove('hidden');
+  prog.querySelector('i').style.width='4%';
+
+  try{
+    const co = COMPANIES[cid]||{};
+    const coName = co['Company Name']||co['Name']||'this company';
+    const diag = document.getElementById('diagText').value.trim();
+    const {pillarNotes, capNotes} = await gatherEvidence(cid);
+
+    if(!diag && !pillarNotes.length){
+      msg.innerHTML='<div class="msg info"><b>No evidence found.</b> Paste the diagnostic report above, or check that MEL commentary exists for this company.</div>';
+      btn.disabled=false; btn.textContent='Generate draft scores'; prog.classList.add('hidden'); return;
+    }
+
+    const evidence = [
+      diag ? `=== DIAGNOSTIC REPORT ===\n${diag}` : '',
+      pillarNotes.length ? `=== MEL PILLAR COMMENTARY ===\n${pillarNotes.join('\n')}` : '',
+      capNotes.length ? `=== CAPACITY NEEDS IDENTIFIED ===\n${capNotes.join('\n')}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    let done=0;
+    for(let si=0; si<SECTIONS.length; si++){
+      const sec = SECTIONS[si];
+      const qs = IRC_QUESTIONS.filter(q=>q[1]===sec);
+      btn.textContent = `Analysing ${sec}…`;
+
+      const prompt = `You are assisting a GIZ SME Programme assessor scoring investment readiness for ${coName}.
+
+Below is all available evidence about this company.
+
+${evidence}
+
+=== TASK ===
+Score each question below on the IRC 1-4 scale:
+1 = Poor — no systems or understanding in place; significant gaps exist
+2 = Basic — some elements exist but informal, inconsistent or poorly implemented
+3 = Adequate — acceptable structure and understanding; some improvements needed
+4 = Strong — fully established systems or clear understanding; best practices followed
+
+Questions in area "${sec}":
+${qs.map(q=>`${q[0]}. ${q[2]}`).join('\n')}
+
+=== RULES ===
+- Only propose a score where the evidence genuinely supports it.
+- If the evidence does not address a question, set score to null and evidence to "No evidence available".
+- Quote or closely paraphrase the specific evidence that justifies each score. Keep it under 25 words.
+- Do not speculate. A null is more useful than a guess.
+
+Respond with ONLY a JSON array, no preamble, no markdown fences:
+[{"no":16,"score":3,"evidence":"..."},...]`;
+
+      const r = await fetch(WORKER_URL,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({prompt, max_tokens:2000})
+      });
+      if(!r.ok) throw new Error(`Worker returned ${r.status}`);
+      const j = await r.json();
+      let txt = j.content?.[0]?.text || j.text || j.result || JSON.stringify(j);
+      txt = txt.replace(/```json|```/g,'').trim();
+      const m = txt.match(/\[[\s\S]*\]/);
+      if(!m) throw new Error('Could not parse response for '+sec);
+
+      JSON.parse(m[0]).forEach(item=>{
+        const no = item.no;
+        if(!IRC_QUESTIONS.some(q=>q[0]===no)) return;
+        if(answers[no]?.confirmed) return;   // never overwrite a human decision
+        answers[no] = answers[no]||{};
+        answers[no].aiEvidence = item.evidence||'';
+        if(item.score!=null && item.score>=1 && item.score<=4){
+          answers[no].score = item.score;
+          answers[no].ai = true; answers[no].confirmed = false;
+        } else {
+          answers[no].ai = true; answers[no].confirmed = false;
+          answers[no].noEvidence = true;
+        }
+        paintAI(no);
+      });
+
+      done++; prog.querySelector('i').style.width = Math.round(done/SECTIONS.length*100)+'%';
+      updateScores();
+    }
+
+    const sug = Object.values(answers).filter(a=>a.ai&&a.score!=null).length;
+    const gaps= Object.values(answers).filter(a=>a.noEvidence).length;
+    msg.innerHTML = `<div class="msg ok"><b>Draft complete.</b> ${sug} questions scored from evidence, ${gaps} flagged as needing your judgement. Review each and confirm or correct.</div>`;
+    btn.textContent='Regenerate draft'; btn.disabled=false;
+    prog.classList.add('hidden');
+    saveDraft(true);
+
+  }catch(e){
+    msg.innerHTML = `<div class="msg err"><b>Pre-fill failed.</b><br>${esc(e.message)}<br><small>You can still score manually. Nothing was lost.</small></div>`;
+    btn.disabled=false; btn.textContent='Generate draft scores'; prog.classList.add('hidden');
+  }
+}
+
+function paintAI(no){
+  const a = answers[no]; if(!a) return;
+  const qe = document.getElementById('q'+no); if(!qe) return;
+
+  if(a.score!=null){
+    SCALE.forEach(([sv])=>{
+      const b=document.getElementById(`s${no}_${sv}`);
+      b.classList.toggle('on',sv===a.score);
+      b.classList.toggle('suggested',sv===a.score && !a.confirmed);
+    });
+    qe.classList.add('answered');
+  }
+  qe.classList.toggle('ai', !a.confirmed);
+
+  const ev = document.getElementById('ev'+no);
+  if(ev){
+    if(a.noEvidence){
+      ev.innerHTML = `<div class="aiev nodata"><b>Needs your judgement</b> — no supporting evidence found in the diagnostic or MEL data.</div>`;
+    } else if(a.aiEvidence){
+      ev.innerHTML = `<div class="aiev"><b>Evidence:</b> ${esc(a.aiEvidence)}</div>` +
+        (!a.confirmed ? `<div class="confirmrow" id="cr${no}">
+           <span class="aibadge">Draft — not saved</span>
+           <button class="mini ok" onclick="confirmOne(${no})">Confirm this score</button>
+         </div>` : '');
+    }
+  }
+}
+
+function confirmOne(no){
+  if(!answers[no]) return;
+  answers[no].confirmed = true;
+  SCALE.forEach(([sv])=>document.getElementById(`s${no}_${sv}`)?.classList.remove('suggested'));
+  document.getElementById('q'+no).classList.remove('ai');
+  document.getElementById('q'+no).classList.add('confirmed');
+  document.getElementById('cr'+no)?.remove();
+  updateScores(); saveDraft(true);
+}
+
+function confirmAllAI(){
+  const n = Object.values(answers).filter(a=>a.ai&&!a.confirmed&&a.score!=null).length;
+  if(!n){ alert('No unconfirmed suggestions.'); return; }
+  if(!confirm(`Confirm all ${n} draft scores as your assessment?\n\nYou remain accountable for these scores — only do this if you have reviewed them.`)) return;
+  Object.keys(answers).forEach(no=>{ if(answers[no].ai&&!answers[no].confirmed&&answers[no].score!=null) confirmOne(+no); });
+}
+
+function clearAI(){
+  if(!confirm('Remove all unconfirmed draft scores? Confirmed scores are kept.')) return;
+  Object.keys(answers).forEach(no=>{
+    const a=answers[no];
+    if(a.ai && !a.confirmed){
+      delete answers[no];
+      SCALE.forEach(([sv])=>document.getElementById(`s${no}_${sv}`)?.classList.remove('on','suggested'));
+      document.getElementById('q'+no)?.classList.remove('answered','ai');
+      const ev=document.getElementById('ev'+no); if(ev) ev.innerHTML='';
+    }
+  });
+  updateScores(); saveDraft(true);
+}
+
+function updateAIStats(){
+  const el = document.getElementById('aiStats'); if(!el) return;
+  const ai   = Object.values(answers).filter(a=>a.ai&&!a.confirmed&&a.score!=null).length;
+  const conf = Object.values(answers).filter(a=>a.confirmed).length;
+  const gaps = Object.values(answers).filter(a=>a.noEvidence&&!a.confirmed).length;
+  el.innerHTML = ai||conf||gaps
+    ? `<span><b>${conf}</b> confirmed by you</span><span><b>${ai}</b> drafts awaiting review</span><span><b>${gaps}</b> need your judgement</span>`
+    : '';
+}
+
+// ── DRAFT ───────────────────────────────────────────────────────────────────
+function draftKey(){
+  return 'irc_'+document.getElementById('company').value+'_'+
+    document.getElementById('assessor').value.trim().replace(/\s+/g,'_')+'_'+
+    document.getElementById('round').value;
+}
+function saveDraft(silent){
+  try{
+    localStorage.setItem(draftKey(), JSON.stringify({
+      answers, profileVals, overall:document.getElementById('overallFeedback').value, ts:Date.now()
+    }));
+    if(!silent) document.getElementById('saveStat').textContent = 'Draft saved locally';
+  }catch(e){}
+}
+function loadDraft(){
+  try{
+    const d = JSON.parse(localStorage.getItem(draftKey())||'null');
+    if(!d) return;
+    answers = d.answers||{}; 
+    Object.assign(profileVals, d.profileVals||{});
+    document.getElementById('overallFeedback').value = d.overall||'';
+    Object.entries(answers).forEach(([no,a])=>{
+      if(a.score){
+        const b=document.getElementById(`s${no}_${a.score}`);
+        if(b){b.classList.add('on'); document.getElementById('q'+no)?.classList.add('answered');}
+      }
+      if(a.founder){const f=document.getElementById('f'+no); if(f)f.value=a.founder;}
+      if(a.assessor){const x=document.getElementById('a'+no); if(x)x.value=a.assessor;}
+    });
+    Object.entries(profileVals).forEach(([k,v])=>{const e=document.getElementById(k); if(e)e.value=v;});
+    Object.keys(answers).forEach(no=>{ if(answers[no].ai||answers[no].aiEvidence) paintAI(+no); });
+  }catch(e){}
+}
+
+// ── SUBMIT ──────────────────────────────────────────────────────────────────
+async function submitAll(){
+  const cid = document.getElementById('company').value;
+  const who = document.getElementById('assessor').value.trim();
+  const round = document.getElementById('round').value;
+  const answered = Object.values(answers).filter(a=>a.score!=null).length;
+  const btn = document.getElementById('submitBtn');
+
+  const unconf = Object.values(answers).filter(a=>a.ai&&!a.confirmed&&a.score!=null).length;
+  if(!answered){ alert('No questions answered yet.'); return; }
+  if(unconf){ alert(`${unconf} draft scores have not been confirmed.\n\nReview and confirm them, or use "Confirm all suggestions", before submitting.`); return; }
+  if(answered<80 && !confirm(`Only ${answered} of 80 questions answered. Submit anyway?`)) return;
+
+  btn.disabled=true; btn.textContent='Submitting…';
+  try{
+    // 1. Assessment Record
+    const ar = await at('Assesment Records',{method:'POST',body:{records:[{fields:{
+      'Company':[cid], 'Assessment Type':round, 'Assessor Name':who,
+      'Call Type':'IRC Assessment',
+      'Date': document.getElementById('adate').value || new Date().toISOString().slice(0,10)
+    }}]}});
+    const arId = ar.records[0].id;
+
+    // 2. IRC Questions — batches of 10
+    const qrecs = IRC_QUESTIONS.filter(q=>answers[q[0]]?.score!=null).map(([no,sec,txt])=>({fields:{
+      'Assessment Record':[arId], 'Section':sec, 'Question No':no, 'Question':txt,
+      'Score':answers[no].score, 'Founder Response':answers[no].founder||'',
+      'Assessor Comment':answers[no].assessor||'', 'Assessor Name':who,
+      'Evidence Basis':answers[no].aiEvidence||'', 'Score Origin':answers[no].ai?'AI-drafted, assessor confirmed':'Assessor direct'
+    }}));
+    for(let i=0;i<qrecs.length;i+=10){
+      await at('IRC Questions',{method:'POST',body:{records:qrecs.slice(i,i+10)}});
+      btn.textContent = `Submitting… ${Math.min(i+10,qrecs.length)}/${qrecs.length}`;
+    }
+
+    // 3. Section roll-up to existing IRC / GIZ Scores
+    const secrecs = SECTIONS.map(s=>{
+      const sc = IRC_QUESTIONS.filter(q=>q[1]===s).map(q=>answers[q[0]]?.score).filter(v=>v!=null);
+      if(!sc.length) return null;
+      const raw = sc.reduce((a,b)=>a+b,0);
+      return {fields:{
+        'Assessment Record':[arId], 'Section':s, 'Raw Score (0–40)':raw,
+        'Normalised Score':+(raw/4).toFixed(2), 'Assessor Name':who,
+        'Assessor Feedback': IRC_QUESTIONS.filter(q=>q[1]===s)
+          .map(q=>answers[q[0]]?.assessor).filter(Boolean).join(' | ')
+      }};
+    }).filter(Boolean);
+    for(let i=0;i<secrecs.length;i+=10){
+      await at('IRC / GIZ Scores',{method:'POST',body:{records:secrecs.slice(i,i+10)}});
+    }
+
+    localStorage.removeItem(draftKey());
+    document.getElementById('setupMsg').innerHTML =
+      `<div class="msg ok"><b>Submitted.</b> ${qrecs.length} question responses and ${secrecs.length} section scores saved.</div>`;
+    btn.textContent='Submitted'; 
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    document.getElementById('setupMsg').innerHTML =
+      `<div class="msg err"><b>Submit failed.</b><br>${esc(e.message)}<br>
+       <small>Your draft is still saved locally. Check the IRC Questions table exists in Airtable.</small></div>`;
+    btn.disabled=false; btn.textContent='Submit to Airtable';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+// ── EXPORT ──────────────────────────────────────────────────────────────────
+function exportCSV(){
+  const co = COMPANIES[document.getElementById('company').value]||{};
+  const nm = co['Company Name']||co['Name']||'company';
+  const rows=[['No','Section','Question','Score','Rating','Company position','Assessor comment','Evidence basis','Score origin']];
+  IRC_QUESTIONS.forEach(([no,sec,txt])=>{
+    const a=answers[no]||{};
+    rows.push([no,sec,txt,a.score||'',a.score?SCALE[a.score-1][1]:'',a.founder||'',a.assessor||'',a.aiEvidence||'',a.ai?'AI-drafted, confirmed':'Assessor direct']);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`IRC_${nm.replace(/\s+/g,'_')}_${document.getElementById('round').value}.csv`;
+  a.click();
+}
+
+document.getElementById('stamp').textContent = new Date().toLocaleDateString('en-GB',{dateStyle:'medium'});
+loadCompanies();
+</script>
+</body>
+</html>
